@@ -1,0 +1,158 @@
+import { Garage, User, ServiceRequest } from '../types';
+
+export const mockGarages: Garage[] = [
+  {
+    id: '1',
+    name: 'Garage Central',
+    email: 'contact@garagecentral.fr',
+    phone: '01 23 45 67 89',
+    address: '15 Avenue des Champs-Élysées, Paris',
+    latitude: 48.8566,
+    longitude: 2.3522,
+    services: ['Dépannage', 'Remorquage', 'Réparation', 'Diagnostic'],
+    rating: 4.5,
+    isOpen: true,
+    openingHours: '24h/24 - 7j/7',
+    description:
+      'Service de dépannage automobile disponible 24h/24. Intervention rapide dans tout Paris.',
+  },
+  {
+    id: '2',
+    name: 'Auto Secours Plus',
+    email: 'info@autosecoursplus.fr',
+    phone: '01 34 56 78 90',
+    address: '42 Rue de la République, Lyon',
+    latitude: 45.764,
+    longitude: 4.8357,
+    services: ['Dépannage', 'Batterie', 'Pneus', 'Serrurerie auto'],
+    rating: 4.2,
+    isOpen: true,
+    openingHours: '6h-22h tous les jours',
+    description:
+      'Spécialiste du dépannage automobile. Intervention en moins de 30 minutes.',
+  },
+  {
+    id: '3',
+    name: 'Garage Express',
+    email: 'service@garageexpress.fr',
+    phone: '01 45 67 89 01',
+    address: '8 Boulevard Voltaire, Marseille',
+    latitude: 43.2965,
+    longitude: 5.3698,
+    services: ['Remorquage', 'Diagnostic', 'Réparation urgente'],
+    rating: 4.0,
+    isOpen: false,
+    openingHours: '8h-18h (Lun-Sam)',
+    description:
+      'Garage de proximité avec une équipe expérimentée. Service rapide et efficace.',
+  },
+  {
+    id: '4',
+    name: 'SOS Mécanique',
+    email: 'urgence@sosmecanique.fr',
+    phone: '01 56 78 90 12',
+    address: '23 Rue du Commerce, Toulouse',
+    latitude: 43.6047,
+    longitude: 1.4442,
+    services: ['Dépannage', 'Mécanique générale', 'Électricité auto'],
+    rating: 4.7,
+    isOpen: true,
+    openingHours: '24h/24 - 7j/7',
+    description:
+      "Service d'urgence automobile. Techniciens qualifiés et équipement moderne.",
+  },
+  {
+    id: '5',
+    name: 'Atelier Mobile',
+    email: 'contact@ateliermobile.fr',
+    phone: '01 67 89 01 23',
+    address: '67 Avenue de la Liberté, Nice',
+    latitude: 43.7102,
+    longitude: 7.262,
+    services: [
+      'Dépannage mobile',
+      'Réparation sur place',
+      'Changement de batterie',
+    ],
+    rating: 4.3,
+    isOpen: true,
+    openingHours: '7h-20h tous les jours',
+    description:
+      "Atelier mobile qui se déplace chez vous. Réparations sur place quand c'est possible.",
+  },
+];
+
+export const mockUsers: User[] = [
+  {
+    id: '1',
+    email: 'client@test.com',
+    name: 'Marie Dupont',
+    phone: '06 12 34 56 78',
+    role: 'client',
+  },
+  {
+    id: '2',
+    email: 'garage@test.com',
+    name: 'Jean Martin',
+    phone: '06 23 45 67 89',
+    role: 'garage',
+    location: {
+      latitude: 48.8566,
+      longitude: 2.3522,
+      address: '15 Avenue des Champs-Élysées, Paris',
+    },
+    isActive: true,
+  },
+];
+
+export const mockServiceRequests: ServiceRequest[] = [
+  {
+    id: '1',
+    clientId: '1',
+    clientName: 'Marie Dupont',
+    clientPhone: '06 12 34 56 78',
+    clientEmail: 'client@test.com',
+    garageId: '1',
+    garageName: 'Garage Central',
+    status: 'accepted',
+    description: 'Panne de batterie, véhicule ne démarre plus',
+    location: {
+      latitude: 48.8588,
+      longitude: 2.3475,
+      address: '25 Rue de Rivoli, Paris',
+    },
+    vehicleInfo: {
+      make: 'Renault',
+      model: 'Clio',
+      year: '2018',
+      licensePlate: 'AB-123-CD',
+    },
+    urgency: 'high',
+    createdAt: '2024-01-15T10:30:00Z',
+    acceptedAt: '2024-01-15T10:45:00Z',
+  },
+  {
+    id: '2',
+    clientId: '1',
+    clientName: 'Marie Dupont',
+    clientPhone: '06 12 34 56 78',
+    clientEmail: 'client@test.com',
+    garageId: '2',
+    garageName: 'Auto Secours Plus',
+    status: 'pending',
+    description: 'Pneu crevé sur autoroute',
+    location: {
+      latitude: 45.764,
+      longitude: 4.8357,
+      address: 'A6 Sortie Lyon Centre',
+    },
+    vehicleInfo: {
+      make: 'Peugeot',
+      model: '308',
+      year: '2020',
+      licensePlate: 'EF-456-GH',
+    },
+    urgency: 'medium',
+    createdAt: '2024-01-16T14:20:00Z',
+  },
+];

@@ -1,0 +1,15 @@
+export type Garage = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  services: string[];
+  rating: number;
+  isOpen: boolean;
+  openingHours: string;
+  description: string;
+  distance?: number;
+};
