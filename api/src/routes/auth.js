@@ -67,12 +67,10 @@ router.post('/register', registerValidation, async (req, res) => {
         !location.longitude ||
         !location.address
       ) {
-        return res
-          .status(400)
-          .json({
-            message:
-              'Les informations de localisation sont requises pour un garage',
-          });
+        return res.status(400).json({
+          message:
+            'Les informations de localisation sont requises pour un garage',
+        });
       }
     }
 
@@ -214,12 +212,10 @@ router.get('/profile', auth, async (req, res) => {
       garage: garageInfo,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: 'Erreur lors de la récupération du profil',
-        error: error.message,
-      });
+    res.status(500).json({
+      message: 'Erreur lors de la récupération du profil',
+      error: error.message,
+    });
   }
 });
 

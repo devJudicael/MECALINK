@@ -42,7 +42,7 @@ export default function RegisterScreen() {
 
     try {
       let success;
-      
+
       if (role === 'client') {
         success = await register({ email, name, phone, password, role });
         if (success) {
@@ -57,17 +57,17 @@ export default function RegisterScreen() {
           password,
           role,
           location: {
-            latitude: 0, // Ces valeurs seront mises à jour ultérieurement
-            longitude: 0, // Ces valeurs seront mises à jour ultérieurement
-            address: address
+            latitude: 48.8566, // Coordonnées par défaut (Paris)
+            longitude: 2.3522, // Coordonnées par défaut (Paris)
+            address: address,
           },
-          services: [] // Services par défaut, à compléter ultérieurement
+          services: [], // Services par défaut, à compléter ultérieurement
         });
         if (success) {
           router.replace('/(garage)');
         }
       }
-      
+
       if (!success) {
         Alert.alert('Erreur', "Erreur lors de l'inscription");
       }

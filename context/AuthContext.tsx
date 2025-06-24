@@ -143,15 +143,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const registerGarage = async (userData: Omit<User, 'id'> & { location: { latitude: number; longitude: number; address: string }, services: string[] }): Promise<boolean> => {
     try {
+      // Afficher les données pour le débogage
+      console.log('Données d\'inscription garage:', JSON.stringify(userData));
+      
       const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          ...userData,
-          role: 'garage'
-        })
+        body: JSON.stringify(userData) // Envoyer les données telles quelles sans les modifier
       });
 
       const data = await response.json();
