@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,94 +6,241 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
-import { User, Mail, Phone, LogOut, Wrench } from 'lucide-react-native';
+import { User, Mail, Phone, LogOut, Wrench, MapPin, Clock } from 'lucide-react-native';
+import { Garage } from '@/types';
 
 export default function GarageProfileScreen() {
   const { currentUser, logout } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [garageData, setGarageData] = useState<Garage | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Charger les données du garage au chargement de l'écran
+  useEffect(() => {
+    const loadGarageData = async () => {
+      if (!currentUser) return;
+      
+      try {
+        setLoading(true);
+        // Ici, nous utilisons les données de l'utilisateur actuel comme données de garage
+        // Dans une implémentation complète, vous feriez un appel API pour obtenir les détails du garage
+        setGarageData({
+          id: currentUser.id,
+          name: currentUser.name,
+          email: currentUser.email,
+          phone: currentUser.phone || 'Non spécifié',
+          address: currentUser.address || 'Adresse non spécifiée',
+          location: currentUser.location || { latitude: 0, longitude: 0 },
+          services: currentUser.services || [],
+          openingHours: currentUser.openingHours || 'Non spécifié',
+          rating: currentUser.rating || 0,
+          isOpen: true,
+          distance: 0
+        });
+      } catch (err) {
+        console.error('Erreur lors du chargement des données du garage:', err);
+        setError('Impossible de charger les données du profil');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadGarageData();
+  }, [currentUser]);
 
   const handleLogout = () => {
-    Alert.alert(
-      'Déconnexion',
-      'Êtes-vous sûr de vouloir vous déconnecter ?',
-      [
-        {
-          text: 'Annuler',
-          style: 'cancel',
-        },
-        {
-          text: 'Déconnexion',
-          style: 'destructive',
-          onPress: logout,
-        },
-      ]
-    );
+    Alert.alert('Déconnexion', 'Êtes-vous sûr de vouloir vous déconnecter ?', [
+      {
+        text: 'Annuler',
+        style: 'cancel',
+      },
+      {
+        text: 'Déconnexion',
+        style: 'destructive',
+        onPress: logout,
+      },
+    ]);
   };
 
-  if (!currentUser) {
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#059669" />
+          <Text style={styles.loadingText}>Chargement du profil...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={() => setLoading(true)} // Cela déclenchera un nouveau chargement via useEffect
+          >
+            <Text style={styles.retryButtonText}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!currentUser || !garageData) {
     return null;
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.avatarContainer}>
-          <Wrench size={32} color="#059669" />
+      <ScrollView>
+        <View style={styles.header}>
+          <View style={styles.avatarContainer}>
+            <Wrench size={32} color="#059669" />
+          </View>
+          <Text style={styles.name}>{garageData.name}</Text>
+          <Text style={styles.role}>Garagiste</Text>
         </View>
-        <Text style={styles.name}>{currentUser.name}</Text>
-        <Text style={styles.role}>Garagiste</Text>
-      </View>
 
-      <View style={styles.content}>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Informations professionnelles</Text>
-          
-          <View style={styles.infoCard}>
-            <View style={styles.infoItem}>
-              <User size={20} color="#64748b" />
-              <View style={styles.infoContent}>
-                <Text style={styles.infoLabel}>Nom du garage</Text>
-                <Text style={styles.infoValue}>{currentUser.name}</Text>
+        <View style={styles.content}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Informations professionnelles</Text>
+
+            <View style={styles.infoCard}>
+              <View style={styles.infoItem}>
+                <User size={20} color="#64748b" />
+                <View style={styles.infoContent}>
+                  <Text style={styles.infoLabel}>Nom du garage</Text>
+                  <Text style={styles.infoValue}>{garageData.name}</Text>
+                </View>
               </View>
-            </View>
 
-            <View style={styles.separator} />
+              <View style={styles.separator} />
 
-            <View style={styles.infoItem}>
-              <Mail size={20} color="#64748b" />
-              <View style={styles.infoContent}>
-                <Text style={styles.infoLabel}>Email</Text>
-                <Text style={styles.infoValue}>{currentUser.email}</Text>
+              <View style={styles.infoItem}>
+                <Mail size={20} color="#64748b" />
+                <View style={styles.infoContent}>
+                  <Text style={styles.infoLabel}>Email</Text>
+                  <Text style={styles.infoValue}>{garageData.email}</Text>
+                </View>
               </View>
-            </View>
 
-            <View style={styles.separator} />
+              <View style={styles.separator} />
 
-            <View style={styles.infoItem}>
-              <Phone size={20} color="#64748b" />
-              <View style={styles.infoContent}>
-                <Text style={styles.infoLabel}>Téléphone</Text>
-                <Text style={styles.infoValue}>{currentUser.phone}</Text>
+              <View style={styles.infoItem}>
+                <Phone size={20} color="#64748b" />
+                <View style={styles.infoContent}>
+                  <Text style={styles.infoLabel}>Téléphone</Text>
+                  <Text style={styles.infoValue}>{garageData.phone}</Text>
+                </View>
+              </View>
+
+              <View style={styles.separator} />
+
+              <View style={styles.infoItem}>
+                <MapPin size={20} color="#64748b" />
+                <View style={styles.infoContent}>
+                  <Text style={styles.infoLabel}>Adresse</Text>
+                  <Text style={styles.infoValue}>{garageData.address}</Text>
+                </View>
+              </View>
+
+              <View style={styles.separator} />
+
+              <View style={styles.infoItem}>
+                <Clock size={20} color="#64748b" />
+                <View style={styles.infoContent}>
+                  <Text style={styles.infoLabel}>Horaires d'ouverture</Text>
+                  <Text style={styles.infoValue}>{garageData.openingHours}</Text>
+                </View>
               </View>
             </View>
           </View>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Actions</Text>
-          
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <LogOut size={20} color="#dc2626" />
-            <Text style={styles.logoutText}>Se déconnecter</Text>
-          </TouchableOpacity>
+          {garageData.services && garageData.services.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Services proposés</Text>
+              <View style={styles.servicesContainer}>
+                {garageData.services.map((service, index) => (
+                  <View key={index} style={styles.serviceTag}>
+                    <Text style={styles.serviceText}>{service}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          <View style={styles.section}>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <LogOut size={20} color="#dc2626" />
+              <Text style={styles.logoutText}>Se déconnecter</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#64748b',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#dc2626',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#059669',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  servicesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  serviceTag: {
+    backgroundColor: '#ecfdf5',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    marginBottom: 8,
+  },
+  serviceText: {
+    color: '#059669',
+    fontSize: 14,
+    fontWeight: '500',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',

@@ -1,22 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   FlatList,
   TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { useService } from '../../context/ServiceContext';
 import { ServiceRequest } from '../../types';
-import { Clock, MapPin, Phone, CircleCheck as CheckCircle, Circle as XCircle, CircleAlert as AlertCircle } from 'lucide-react-native';
+import {
+  Clock,
+  MapPin,
+  Phone,
+  CircleCheck as CheckCircle,
+  Circle as XCircle,
+  CircleAlert as AlertCircle,
+} from 'lucide-react-native';
 
 export default function HistoryScreen() {
   const { currentUser } = useAuth();
-  const { getRequestsForClient } = useService();
+  const { getRequestsForClient, refreshRequests } = useService();
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
 
-  const requests = currentUser ? getRequestsForClient(currentUser.id) : [];
+  useEffect(() => {
+    const loadRequests = async () => {
+      if (currentUser) {
+        const clientRequests = await getRequestsForClient();
+        setRequests(clientRequests);
+      }
+    };
+    
+    loadRequests();
+  }, [currentUser, getRequestsForClient]);
 
   const getStatusIcon = (status: ServiceRequest['status']) => {
     switch (status) {
@@ -75,17 +92,20 @@ export default function HistoryScreen() {
       <View style={styles.requestHeader}>
         <View style={styles.statusContainer}>
           {getStatusIcon(request.status)}
-          <Text style={[styles.statusText, { color: getStatusColor(request.status) }]}>
+          <Text
+            style={[
+              styles.statusText,
+              { color: getStatusColor(request.status) },
+            ]}
+          >
             {getStatusText(request.status)}
           </Text>
         </View>
-        <Text style={styles.dateText}>
-          {formatDate(request.createdAt)}
-        </Text>
+        <Text style={styles.dateText}>{formatDate(request.createdAt)}</Text>
       </View>
 
       <Text style={styles.garageName}>{request.garageName}</Text>
-      
+
       <View style={styles.locationContainer}>
         <MapPin size={16} color="#64748b" />
         <Text style={styles.locationText}>{request.location.address}</Text>
@@ -93,29 +113,13 @@ export default function HistoryScreen() {
 
       <Text style={styles.description}>{request.description}</Text>
 
-      <View style={styles.vehicleInfo}>
+      {/* <View style={styles.vehicleInfo}>
         <Text style={styles.vehicleText}>
-          {request.vehicleInfo.make} {request.vehicleInfo.model} ({request.vehicleInfo.year})
+          {request.vehicleInfo.make} {request.vehicleInfo.model} (
+          {request.vehicleInfo.year})
         </Text>
         <Text style={styles.plateText}>{request.vehicleInfo.licensePlate}</Text>
-      </View>
-
-      <View style={styles.urgencyContainer}>
-        <View style={[
-          styles.urgencyBadge,
-          request.urgency === 'high' ? styles.urgencyHigh :
-          request.urgency === 'medium' ? styles.urgencyMedium : styles.urgencyLow
-        ]}>
-          <Text style={[
-            styles.urgencyText,
-            request.urgency === 'high' ? styles.urgencyHighText :
-            request.urgency === 'medium' ? styles.urgencyMediumText : styles.urgencyLowText
-          ]}>
-            {request.urgency === 'high' ? 'Urgent' :
-             request.urgency === 'medium' ? 'Moyen' : 'Faible'}
-          </Text>
-        </View>
-      </View>
+      </View> */}
     </View>
   );
 
@@ -136,7 +140,10 @@ export default function HistoryScreen() {
         </View>
       ) : (
         <FlatList
-          data={requests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())}
+          data={requests.filter(() => true).sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )}
           renderItem={renderRequestItem}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}

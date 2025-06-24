@@ -16,6 +16,18 @@ export default function ClientLayout() {
           paddingBottom: 8,
           paddingTop: 8,
           height: 70,
+
+          // overflowX: "hidden",
+          width: '100%',
+          justifyContent: 'center',
+
+          alignItems: 'center',
+
+          bottom: 0,
+          position: 'absolute',
+          // overflowX: "hidden",
+          alignContent: 'center',
+          alignSelf: 'center',
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -27,18 +39,14 @@ export default function ClientLayout() {
         name="index"
         options={{
           title: 'Carte',
-          tabBarIcon: ({ size, color }) => (
-            <Map size={size} color={color} />
-          ),
+          tabBarIcon: ({ size, color }) => <Map size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="garages"
         options={{
           title: 'Garages',
-          tabBarIcon: ({ size, color }) => (
-            <List size={size} color={color} />
-          ),
+          tabBarIcon: ({ size, color }) => <List size={size} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -54,9 +62,7 @@ export default function ClientLayout() {
         name="profile"
         options={{
           title: 'Profil',
-          tabBarIcon: ({ size, color }) => (
-            <User size={size} color={color} />
-          ),
+          tabBarIcon: ({ size, color }) => <User size={size} color={color} />,
         }}
       />
     </Tabs>

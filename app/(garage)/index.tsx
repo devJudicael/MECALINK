@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,18 +7,69 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useService } from '../../context/ServiceContext';
 import { ServiceRequest } from '../../types';
-import { MapPin, Phone, Mail, Clock, Car, CircleCheck as CheckCircle, Circle as XCircle } from 'lucide-react-native';
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Car,
+  CircleCheck as CheckCircle,
+  Circle as XCircle,
+  RefreshCw,
+} from 'lucide-react-native';
 
 export default function GarageRequestsScreen() {
   const { currentUser } = useAuth();
-  const { getRequestsForGarage, updateRequestStatus } = useService();
-
-  const requests = currentUser ? getRequestsForGarage(currentUser.id) : [];
-  const pendingRequests = requests.filter(request => request.status === 'pending');
+  const { getRequestsForGarage, updateRequestStatus, refreshRequests } = useService();
+  
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<ServiceRequest[]>([]);
+  
+  // Charger les demandes au chargement de l'écran
+  useEffect(() => {
+    loadRequests();
+  }, [currentUser]);
+  
+  // Filtrer les demandes en attente lorsque les demandes changent
+  useEffect(() => {
+    setPendingRequests(requests.filter(request => request.status === 'pending'));
+  }, [requests]);
+  
+  // Fonction pour charger les demandes
+  const loadRequests = async () => {
+    if (!currentUser) return;
+    
+    try {
+      setLoading(true);
+      const fetchedRequests = await getRequestsForGarage();
+      setRequests(fetchedRequests);
+    } catch (error) {
+      console.error('Error loading requests:', error);
+      Alert.alert('Erreur', 'Impossible de charger les demandes');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Fonction pour rafraîchir les demandes
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await refreshRequests();
+      await loadRequests();
+    } catch (error) {
+      console.error('Error refreshing requests:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const handleAcceptRequest = (requestId: string) => {
     Alert.alert(
@@ -32,7 +83,15 @@ export default function GarageRequestsScreen() {
         {
           text: 'Accepter',
           style: 'default',
-          onPress: () => updateRequestStatus(requestId, 'accepted'),
+          onPress: async () => {
+            try {
+              await updateRequestStatus(requestId, 'accepted');
+              await loadRequests();
+            } catch (error) {
+              console.error('Error accepting request:', error);
+              Alert.alert('Erreur', 'Impossible d\'accepter la demande');
+            }
+          },
         },
       ]
     );
@@ -50,7 +109,15 @@ export default function GarageRequestsScreen() {
         {
           text: 'Refuser',
           style: 'destructive',
-          onPress: () => updateRequestStatus(requestId, 'rejected'),
+          onPress: async () => {
+            try {
+              await updateRequestStatus(requestId, 'rejected');
+              await loadRequests();
+            } catch (error) {
+              console.error('Error rejecting request:', error);
+              Alert.alert('Erreur', 'Impossible de rejeter la demande');
+            }
+          },
         },
       ]
     );
@@ -74,23 +141,6 @@ export default function GarageRequestsScreen() {
         <Text style={styles.dateText}>{formatDate(request.createdAt)}</Text>
       </View>
 
-      <View style={styles.urgencyContainer}>
-        <View style={[
-          styles.urgencyBadge,
-          request.urgency === 'high' ? styles.urgencyHigh :
-          request.urgency === 'medium' ? styles.urgencyMedium : styles.urgencyLow
-        ]}>
-          <Text style={[
-            styles.urgencyText,
-            request.urgency === 'high' ? styles.urgencyHighText :
-            request.urgency === 'medium' ? styles.urgencyMediumText : styles.urgencyLowText
-          ]}>
-            {request.urgency === 'high' ? 'Urgent' :
-             request.urgency === 'medium' ? 'Moyen' : 'Faible'}
-          </Text>
-        </View>
-      </View>
-
       <Text style={styles.description}>{request.description}</Text>
 
       <View style={styles.locationContainer}>
@@ -112,7 +162,8 @@ export default function GarageRequestsScreen() {
       <View style={styles.vehicleContainer}>
         <Car size={16} color="#64748b" />
         <Text style={styles.vehicleText}>
-          {request.vehicleInfo.make} {request.vehicleInfo.model} ({request.vehicleInfo.year})
+          {request.vehicleInfo.make} {request.vehicleInfo.model} (
+          {request.vehicleInfo.year})
         </Text>
         <Text style={styles.plateText}>{request.vehicleInfo.licensePlate}</Text>
       </View>
@@ -136,11 +187,34 @@ export default function GarageRequestsScreen() {
     </View>
   );
 
+  // Afficher un indicateur de chargement
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#059669" />
+          <Text style={styles.loadingText}>Chargement des demandes...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Demandes reçues</Text>
-        <Text style={styles.subtitle}>{pendingRequests.length} demandes en attente</Text>
+        <View style={styles.headerActions}>
+          <Text style={styles.subtitle}>
+            {pendingRequests.length} demandes en attente
+          </Text>
+          <TouchableOpacity 
+            style={styles.refreshButton} 
+            onPress={handleRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw size={20} color="#059669" style={refreshing ? styles.rotating : undefined} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {pendingRequests.length === 0 ? (
@@ -153,11 +227,16 @@ export default function GarageRequestsScreen() {
         </View>
       ) : (
         <FlatList
-          data={pendingRequests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())}
+          data={pendingRequests.sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )}
           renderItem={renderRequestItem}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
         />
       )}
     </SafeAreaView>
@@ -165,6 +244,28 @@ export default function GarageRequestsScreen() {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#64748b',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  refreshButton: {
+    padding: 8,
+  },
+  rotating: {
+    transform: [{ rotate: '45deg' }],
+  },
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',

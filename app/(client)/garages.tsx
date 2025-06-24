@@ -3,14 +3,16 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   FlatList,
   TouchableOpacity,
   TextInput,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
-import type { Garage } from '@/types/garages';
+import type { Garage } from '@/types';
 import { Search, MapPin, Star, Clock, ChevronRight } from 'lucide-react-native';
 import { useGarageStore } from '@/stores/garages';
 
@@ -18,12 +20,48 @@ export default function GaragesListScreen() {
   const [garages, setGarages] = useState<Garage[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredGarages, setFilteredGarages] = useState<Garage[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
-  const { nearbyGarages } = useGarageStore();
+  const { nearbyGarages, isLoading: isLoadingGarages, error, fetchNearbyGarages } = useGarageStore();
+
+  // Récupérer la position de l'utilisateur et les garages à proximité
+  useEffect(() => {
+    const getLocationAndGarages = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(
+            'Permission requise',
+            "L'accès à la géolocalisation est nécessaire pour afficher les garages à proximité"
+          );
+          setIsLoading(false);
+          return;
+        }
+
+        const currentLocation = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
+
+        await fetchNearbyGarages(currentLocation);
+      } catch (error) {
+        console.error('Error getting location or garages:', error);
+        Alert.alert(
+          'Erreur',
+          'Impossible de récupérer votre position ou les garages à proximité'
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    getLocationAndGarages();
+  }, []);
 
   useEffect(() => {
-    setGarages(nearbyGarages);
+    if (nearbyGarages.length > 0) {
+      setGarages(nearbyGarages.sort((a, b) => a.distance! - b.distance!));
+    }
   }, [nearbyGarages]);
 
   useEffect(() => {
@@ -62,7 +100,7 @@ export default function GaragesListScreen() {
       <View style={styles.garageHeader}>
         <View style={styles.garageInfo}>
           <Text style={styles.garageName}>{garage.name}</Text>
-          <View style={styles.ratingContainer}>
+          {/* <View style={styles.ratingContainer}>
             <Star size={16} color="#FCD34D" fill="#FCD34D" />
             <Text style={styles.rating}>{garage.rating}</Text>
             <View
@@ -80,7 +118,7 @@ export default function GaragesListScreen() {
                 {garage.isOpen ? 'Ouvert' : 'Fermé'}
               </Text>
             </View>
-          </View>
+          </View> */}
         </View>
         <ChevronRight size={20} color="#64748b" />
       </View>
@@ -111,6 +149,26 @@ export default function GaragesListScreen() {
     </TouchableOpacity>
   );
 
+  // Afficher un indicateur de chargement
+  if (isLoading || isLoadingGarages) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#2563EB" />
+          <Text style={styles.loadingText}>Chargement des garages...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Afficher un message d'erreur si nécessaire
+  if (error) {
+    Alert.alert(
+      'Erreur de connexion',
+      'Des données fictives sont affichées car nous n\'avons pas pu nous connecter au serveur.'
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -132,25 +190,60 @@ export default function GaragesListScreen() {
         </View>
       </View>
 
-      <FlatList
-        data={filteredGarages}
-        renderItem={renderGarageItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-      />
+      {filteredGarages.length > 0 ? (
+        <FlatList
+          data={filteredGarages}
+          renderItem={renderGarageItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+        />
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Aucun garage trouvé</Text>
+          <Text style={styles.emptySubtext}>Essayez de modifier votre recherche</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#64748b',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 16,
+    color: '#64748b',
+    textAlign: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
   },
   header: {
     padding: 20,
-    paddingTop: 40,
+    // paddingTop: 40,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e2e8f0',

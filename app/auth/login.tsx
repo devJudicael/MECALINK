@@ -98,13 +98,6 @@ export default function LoginScreen() {
               </Text>
             </TouchableOpacity>
           </View>
-
-          <View style={styles.testAccounts}>
-            <Text style={styles.testTitle}>Comptes de test :</Text>
-            <Text style={styles.testAccount}>Client: client@test.com</Text>
-            <Text style={styles.testAccount}>Garagiste: garage@test.com</Text>
-            <Text style={styles.testPassword}>Mot de passe: test123</Text>
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -186,30 +179,5 @@ const styles = StyleSheet.create({
     color: '#2563EB',
     fontSize: 16,
     fontWeight: '500',
-  },
-  testAccounts: {
-    marginTop: 40,
-    padding: 16,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  testTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
-  },
-  testAccount: {
-    fontSize: 14,
-    color: '#64748b',
-    marginBottom: 4,
-  },
-  testPassword: {
-    fontSize: 14,
-    color: '#64748b',
-    fontStyle: 'italic',
-    marginTop: 4,
   },
 });

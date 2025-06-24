@@ -11,8 +11,7 @@ import {
 import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import type { Garage } from '@/types/garages';
-import { mockGarages } from '../../utils/mockData';
+import type { Garage } from '@/types';
 import { MapPin, Navigation } from 'lucide-react-native';
 import { useGarageStore } from '../../stores/garages';
 
@@ -22,7 +21,7 @@ export default function ClientMapScreen() {
   );
   const [region, setRegion] = useState<Region | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { generateNearbyGarages, nearbyGarages } = useGarageStore();
+  const { fetchNearbyGarages, nearbyGarages, isLoading: isLoadingGarages, error } = useGarageStore();
   const router = useRouter();
 
   // Obtenir la géolocalisation une fois
@@ -54,8 +53,8 @@ export default function ClientMapScreen() {
           longitudeDelta: 0.0421,
         });
 
-        // generer des garages
-        generateNearbyGarages(currentLocation);
+        // récupérer les garages à proximité (rayon de 10km par défaut)
+        await fetchNearbyGarages(currentLocation);
       } catch (error) {
         console.error('Error getting location:', error);
 
@@ -91,12 +90,20 @@ export default function ClientMapScreen() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingGarages) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#2563EB" />
         <Text style={styles.loadingText}>Chargement de la carte...</Text>
       </View>
+    );
+  }
+  
+  // Afficher un message d'erreur si nécessaire
+  if (error) {
+    Alert.alert(
+      'Erreur de connexion',
+      'Des données fictives sont affichées car nous n\'avons pas pu nous connecter au serveur.'
     );
   }
 

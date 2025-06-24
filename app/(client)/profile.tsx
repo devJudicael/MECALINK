@@ -14,21 +14,17 @@ export default function ProfileScreen() {
   const { currentUser, logout } = useAuth();
 
   const handleLogout = () => {
-    Alert.alert(
-      'Déconnexion',
-      'Êtes-vous sûr de vouloir vous déconnecter ?',
-      [
-        {
-          text: 'Annuler',
-          style: 'cancel',
-        },
-        {
-          text: 'Déconnexion',
-          style: 'destructive',
-          onPress: logout,
-        },
-      ]
-    );
+    Alert.alert('Déconnexion', 'Êtes-vous sûr de vouloir vous déconnecter ?', [
+      {
+        text: 'Annuler',
+        style: 'cancel',
+      },
+      {
+        text: 'Déconnexion',
+        style: 'destructive',
+        onPress: logout,
+      },
+    ]);
   };
 
   if (!currentUser) {
@@ -48,7 +44,7 @@ export default function ProfileScreen() {
       <View style={styles.content}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Informations personnelles</Text>
-          
+
           <View style={styles.infoCard}>
             <View style={styles.infoItem}>
               <User size={20} color="#64748b" />
@@ -81,8 +77,6 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Actions</Text>
-          
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <LogOut size={20} color="#dc2626" />
             <Text style={styles.logoutText}>Se déconnecter</Text>

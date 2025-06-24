@@ -1,22 +1,66 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   SafeAreaView,
   FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useService } from '../../context/ServiceContext';
 import { ServiceRequest } from '../../types';
-import { Clock, MapPin, Phone, CircleCheck as CheckCircle, Circle as XCircle } from 'lucide-react-native';
+import { Clock, MapPin, Phone, CircleCheck as CheckCircle, Circle as XCircle, RefreshCw } from 'lucide-react-native';
 
 export default function GarageHistoryScreen() {
   const { currentUser } = useAuth();
-  const { getRequestsForGarage } = useService();
-
-  const requests = currentUser ? getRequestsForGarage(currentUser.id) : [];
-  const processedRequests = requests.filter(request => request.status !== 'pending');
+  const { getRequestsForGarage, refreshRequests } = useService();
+  
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [processedRequests, setProcessedRequests] = useState<ServiceRequest[]>([]);
+  
+  // Charger les demandes au chargement de l'écran
+  useEffect(() => {
+    loadRequests();
+  }, [currentUser]);
+  
+  // Filtrer les demandes traitées lorsque les demandes changent
+  useEffect(() => {
+    setProcessedRequests(requests.filter(request => request.status !== 'pending'));
+  }, [requests]);
+  
+  // Fonction pour charger les demandes
+  const loadRequests = async () => {
+    if (!currentUser) return;
+    
+    try {
+      setLoading(true);
+      const fetchedRequests = await getRequestsForGarage(currentUser.id);
+      setRequests(fetchedRequests);
+    } catch (error) {
+      console.error('Error loading requests:', error);
+      Alert.alert('Erreur', 'Impossible de charger l\'historique des demandes');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Fonction pour rafraîchir les demandes
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await refreshRequests();
+      await loadRequests();
+    } catch (error) {
+      console.error('Error refreshing requests:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const getStatusIcon = (status: ServiceRequest['status']) => {
     switch (status) {
@@ -122,11 +166,32 @@ export default function GarageHistoryScreen() {
     </View>
   );
 
+  // Afficher un indicateur de chargement
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#059669" />
+          <Text style={styles.loadingText}>Chargement de l'historique...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Historique des demandes</Text>
-        <Text style={styles.subtitle}>{processedRequests.length} demandes traitées</Text>
+        <View style={styles.headerActions}>
+          <Text style={styles.subtitle}>{processedRequests.length} demandes traitées</Text>
+          <TouchableOpacity 
+            style={styles.refreshButton} 
+            onPress={handleRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw size={20} color="#059669" style={refreshing ? styles.rotating : undefined} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {processedRequests.length === 0 ? (
@@ -144,6 +209,8 @@ export default function GarageHistoryScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
         />
       )}
     </SafeAreaView>
@@ -151,6 +218,28 @@ export default function GarageHistoryScreen() {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#64748b',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  refreshButton: {
+    padding: 8,
+  },
+  rotating: {
+    transform: [{ rotate: '45deg' }],
+  },
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',

@@ -86,7 +86,7 @@ export const mockUsers: User[] = [
   {
     id: '1',
     email: 'client@test.com',
-    name: 'Marie Dupont',
+    name: 'user',
     phone: '06 12 34 56 78',
     role: 'client',
   },
@@ -109,7 +109,7 @@ export const mockServiceRequests: ServiceRequest[] = [
   {
     id: '1',
     clientId: '1',
-    clientName: 'Marie Dupont',
+    clientName: 'user',
     clientPhone: '06 12 34 56 78',
     clientEmail: 'client@test.com',
     garageId: '1',
@@ -134,7 +134,7 @@ export const mockServiceRequests: ServiceRequest[] = [
   {
     id: '2',
     clientId: '1',
-    clientName: 'Marie Dupont',
+    clientName: 'user',
     clientPhone: '06 12 34 56 78',
     clientEmail: 'client@test.com',
     garageId: '2',

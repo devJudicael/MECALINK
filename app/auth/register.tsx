@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
-import { UserPlus, Car, Wrench } from 'lucide-react-native';
+import { UserPlus, Car, Wrench, MapPin } from 'lucide-react-native';
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
@@ -21,9 +21,10 @@ export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [role, setRole] = useState<'client' | 'garage'>('client');
+  const [address, setAddress] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register } = useAuth();
+  const { register, registerGarage } = useAuth();
   const router = useRouter();
 
   const handleRegister = async () => {
@@ -32,19 +33,42 @@ export default function RegisterScreen() {
       return;
     }
 
+    if (role === 'garage' && !address) {
+      Alert.alert('Erreur', "Veuillez fournir l'adresse de votre garage");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const success = await register({ email, name, phone, role });
-      if (success) {
-        console.log({
+      let success;
+      
+      if (role === 'client') {
+        success = await register({ email, name, phone, password, role });
+        if (success) {
+          router.replace('/(client)');
+        }
+      } else {
+        // Pour les garages, on utilise registerGarage avec les informations de localisation
+        success = await registerGarage({
           email,
           name,
           phone,
+          password,
           role,
+          location: {
+            latitude: 0, // Ces valeurs seront mises à jour ultérieurement
+            longitude: 0, // Ces valeurs seront mises à jour ultérieurement
+            address: address
+          },
+          services: [] // Services par défaut, à compléter ultérieurement
         });
-        router.replace('/(client)');
-      } else {
+        if (success) {
+          router.replace('/(garage)');
+        }
+      }
+      
+      if (!success) {
         Alert.alert('Erreur', "Erreur lors de l'inscription");
       }
     } catch (error) {
@@ -149,6 +173,19 @@ export default function RegisterScreen() {
               secureTextEntry
             />
 
+            {role === 'garage' && (
+              <View style={styles.addressContainer}>
+                <MapPin size={20} color="#64748b" style={styles.addressIcon} />
+                <TextInput
+                  style={styles.addressInput}
+                  placeholder="Adresse du garage"
+                  value={address}
+                  onChangeText={setAddress}
+                  multiline
+                />
+              </View>
+            )}
+
             <TouchableOpacity
               style={[styles.button, isLoading && styles.buttonDisabled]}
               onPress={handleRegister}
@@ -210,7 +247,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: '#64748b',
-    textAlign: 'center',
   },
   form: {
     gap: 16,
@@ -219,10 +255,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   roleLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 12,
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#64748b',
+    marginBottom: 8,
   },
   roleButtons: {
     flexDirection: 'row',
@@ -233,46 +269,64 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#fff',
     gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    backgroundColor: '#f8fafc',
   },
   roleButtonActive: {
-    borderColor: '#2563EB',
     backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
   },
   roleButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
     color: '#64748b',
   },
   roleButtonTextActive: {
     color: '#fff',
   },
   input: {
-    height: 56,
     backgroundColor: '#fff',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    fontSize: 16,
     borderWidth: 1,
     borderColor: '#e2e8f0',
+    borderRadius: 8,
+    padding: 16,
+    fontSize: 16,
+    color: '#1e293b',
+  },
+  addressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    padding: 16,
+  },
+  addressIcon: {
+    marginRight: 10,
+  },
+  addressInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#1e293b',
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 56,
-    backgroundColor: '#2563EB',
-    borderRadius: 12,
     gap: 8,
+    backgroundColor: '#2563EB',
+    borderRadius: 8,
+    padding: 16,
     marginTop: 8,
   },
   buttonDisabled: {
-    opacity: 0.6,
+    backgroundColor: '#93c5fd',
   },
   buttonText: {
     color: '#fff',
@@ -281,7 +335,7 @@ const styles = StyleSheet.create({
   },
   switchButton: {
     alignItems: 'center',
-    marginTop: 16,
+    padding: 16,
   },
   switchButtonText: {
     color: '#2563EB',

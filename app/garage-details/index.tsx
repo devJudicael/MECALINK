@@ -1,31 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   TextInput,
   Alert,
+  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { useAuth } from '../../context/AuthContext';
 import { useService } from '../../context/ServiceContext';
-import { mockGarages } from '../../utils/mockData';
-import { ArrowLeft, MapPin, Star, Clock, Phone, Mail, Car, TriangleAlert as AlertTriangle } from 'lucide-react-native';
+import { useGarageStore } from '@/stores/garages';
+import {
+  ArrowLeft,
+  MapPin,
+  Star,
+  Clock,
+  Phone,
+  Mail,
+  Car,
+  TriangleAlert as AlertTriangle,
+} from 'lucide-react-native';
 
 export default function GarageDetailsScreen() {
   const { garageId } = useLocalSearchParams();
   const router = useRouter();
   const { currentUser } = useAuth();
   const { createRequest } = useService();
+  const { getGarageById, selectedGarage, setSelectedGarage } = useGarageStore();
   
-  const garage = mockGarages.find(g => g.id === garageId);
+  const [loading, setLoading] = useState(true);
+  const [garage, setGarage] = useState(null);
   
+  useEffect(() => {
+    const fetchGarageDetails = async () => {
+      setLoading(true);
+      try {
+        const garageDetails = await getGarageById(garageId as string);
+        if (garageDetails) {
+          setGarage(garageDetails);
+          setSelectedGarage(garageDetails);
+        } else {
+          Alert.alert('Erreur', 'Impossible de trouver les détails du garage');
+        }
+      } catch (error) {
+        console.error('Error fetching garage details:', error);
+        Alert.alert('Erreur', 'Impossible de récupérer les détails du garage');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchGarageDetails();
+    
+    return () => {
+      setSelectedGarage(null);
+    };
+  }, [garageId]);
+
   const [description, setDescription] = useState('');
   const [vehicleMake, setVehicleMake] = useState('');
   const [vehicleModel, setVehicleModel] = useState('');
@@ -34,21 +72,59 @@ export default function GarageDetailsScreen() {
   const [urgency, setUrgency] = useState<'low' | 'medium' | 'high'>('medium');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#2563EB" />
+          <Text style={styles.loadingText}>Chargement des détails...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  
   if (!garage) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text>Garage non trouvé</Text>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <ArrowLeft size={24} color="#1e293b" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Détails du garage</Text>
+        </View>
+        <View style={styles.errorContainer}>
+          <AlertTriangle size={48} color="#dc2626" />
+          <Text style={styles.errorText}>Garage non trouvé</Text>
+          <TouchableOpacity 
+            style={styles.backToListButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.backToListText}>Retour à la liste</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
 
   const handleSubmitRequest = async () => {
     if (!currentUser) {
-      Alert.alert('Erreur', 'Vous devez être connecté pour envoyer une demande');
+      Alert.alert(
+        'Erreur',
+        'Vous devez être connecté pour envoyer une demande'
+      );
       return;
     }
 
-    if (!description.trim() || !vehicleMake.trim() || !vehicleModel.trim() || !vehicleYear.trim() || !licensePlate.trim()) {
+    if (
+      !description.trim() ||
+      !vehicleMake.trim() ||
+      !vehicleModel.trim() ||
+      !vehicleYear.trim() ||
+      !licensePlate.trim()
+    ) {
       Alert.alert('Erreur', 'Veuillez remplir tous les champs');
       return;
     }
@@ -72,13 +148,15 @@ export default function GarageDetailsScreen() {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         });
-        
+
         if (reverseGeocodeResult.length > 0) {
           const address = reverseGeocodeResult[0];
           userLocation = {
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
-            address: `${address.street || ''} ${address.streetNumber || ''}, ${address.city || ''}, ${address.region || ''}`.trim(),
+            address: `${address.street || ''} ${address.streetNumber || ''}, ${
+              address.city || ''
+            }, ${address.region || ''}`.trim(),
           };
         }
       }
@@ -113,7 +191,10 @@ export default function GarageDetailsScreen() {
       );
     } catch (error) {
       console.error('Error submitting request:', error);
-      Alert.alert('Erreur', 'Une erreur est survenue lors de l\'envoi de votre demande');
+      Alert.alert(
+        'Erreur',
+        "Une erreur est survenue lors de l'envoi de votre demande"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -121,12 +202,15 @@ export default function GarageDetailsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoid}
       >
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <ArrowLeft size={24} color="#1e293b" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Détails du garage</Text>
@@ -136,15 +220,6 @@ export default function GarageDetailsScreen() {
           <View style={styles.garageCard}>
             <View style={styles.garageHeader}>
               <Text style={styles.garageName}>{garage.name}</Text>
-              <View style={styles.ratingContainer}>
-                <Star size={20} color="#FCD34D" fill="#FCD34D" />
-                <Text style={styles.rating}>{garage.rating}</Text>
-                <View style={[styles.statusBadge, garage.isOpen ? styles.openBadge : styles.closedBadge]}>
-                  <Text style={[styles.statusText, garage.isOpen ? styles.openText : styles.closedText]}>
-                    {garage.isOpen ? 'Ouvert' : 'Fermé'}
-                  </Text>
-                </View>
-              </View>
             </View>
 
             <View style={styles.infoContainer}>
@@ -171,7 +246,7 @@ export default function GarageDetailsScreen() {
             <View style={styles.servicesContainer}>
               <Text style={styles.servicesTitle}>Services proposés</Text>
               <View style={styles.servicesList}>
-                {garage.services.map((service, index) => (
+                {garage.services.map((service: any, index: number) => (
                   <View key={index} style={styles.serviceTag}>
                     <Text style={styles.serviceText}>{service}</Text>
                   </View>
@@ -184,7 +259,7 @@ export default function GarageDetailsScreen() {
             <Text style={styles.formTitle}>Demander un dépannage</Text>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Description du problème *</Text>
+              <Text style={styles.inputLabel}>Description du problème</Text>
               <TextInput
                 style={[styles.textInput, styles.textArea]}
                 placeholder="Décrivez votre problème en détail..."
@@ -196,9 +271,9 @@ export default function GarageDetailsScreen() {
               />
             </View>
 
-            <View style={styles.vehicleSection}>
+            {/* <View style={styles.vehicleSection}>
               <Text style={styles.sectionTitle}>Informations du véhicule</Text>
-              
+
               <View style={styles.inputRow}>
                 <View style={[styles.inputGroup, styles.halfWidth]}>
                   <Text style={styles.inputLabel}>Marque *</Text>
@@ -242,9 +317,9 @@ export default function GarageDetailsScreen() {
                   />
                 </View>
               </View>
-            </View>
+            </View> */}
 
-            <View style={styles.urgencySection}>
+            {/* <View style={styles.urgencySection}>
               <Text style={styles.sectionTitle}>Niveau d'urgence</Text>
               <View style={styles.urgencyButtons}>
                 {[
@@ -256,14 +331,17 @@ export default function GarageDetailsScreen() {
                     key={option.key}
                     style={[
                       styles.urgencyButton,
-                      urgency === option.key && { backgroundColor: option.color },
+                      urgency === option.key && {
+                        backgroundColor: option.color,
+                      },
                     ]}
                     onPress={() => setUrgency(option.key as any)}
                   >
                     <Text
                       style={[
                         styles.urgencyButtonText,
-                        urgency === option.key && styles.urgencyButtonTextActive,
+                        urgency === option.key &&
+                          styles.urgencyButtonTextActive,
                       ]}
                     >
                       {option.label}
@@ -271,10 +349,13 @@ export default function GarageDetailsScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-            </View>
+            </View> */}
 
             <TouchableOpacity
-              style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+              style={[
+                styles.submitButton,
+                isSubmitting && styles.submitButtonDisabled,
+              ]}
               onPress={handleSubmitRequest}
               disabled={isSubmitting}
             >
@@ -291,6 +372,41 @@ export default function GarageDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#64748b',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    marginTop: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1e293b',
+  },
+  backToListButton: {
+    marginTop: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: '#2563EB',
+    borderRadius: 12,
+  },
+  backToListText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
