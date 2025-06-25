@@ -21,11 +21,22 @@ export default function ClientMapScreen() {
   );
   const [region, setRegion] = useState<Region | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { fetchNearbyGarages, nearbyGarages, isLoading: isLoadingGarages, error } = useGarageStore();
+  const {
+    fetchNearbyGarages,
+    nearbyGarages,
+    isLoading: isLoadingGarages,
+    error,
+  } = useGarageStore();
   const router = useRouter();
+
+  // Utiliser useRef pour suivre si l'effet a déjà été exécuté
+  const hasInitialized = React.useRef(false);
 
   // Obtenir la géolocalisation une fois
   useEffect(() => {
+    // Éviter les exécutions multiples
+    if (hasInitialized.current) return;
+    
     // fn pour demander les permissions de localisation
     const getLocationPermission = async () => {
       try {
@@ -55,6 +66,9 @@ export default function ClientMapScreen() {
 
         // récupérer les garages à proximité (rayon de 10km par défaut)
         await fetchNearbyGarages(currentLocation);
+        
+        // Marquer comme initialisé après le premier chargement réussi
+        hasInitialized.current = true;
       } catch (error) {
         console.error('Error getting location:', error);
 
@@ -70,7 +84,7 @@ export default function ClientMapScreen() {
     };
 
     getLocationPermission();
-  }, []);
+  }, []); // Tableau de dépendances vide pour n'exécuter qu'une seule fois
 
   const handleMarkerPress = (garage: Garage) => {
     router.push({
@@ -98,12 +112,12 @@ export default function ClientMapScreen() {
       </View>
     );
   }
-  
+
   // Afficher un message d'erreur si nécessaire
   if (error) {
     Alert.alert(
       'Erreur de connexion',
-      'Des données fictives sont affichées car nous n\'avons pas pu nous connecter au serveur.'
+      "Des données fictives sont affichées car nous n'avons pas pu nous connecter au serveur."
     );
   }
 
@@ -125,21 +139,24 @@ export default function ClientMapScreen() {
             showsUserLocation={true}
             showsMyLocationButton={false}
           >
-            {nearbyGarages.map((garage) => (
-              <Marker
-                key={garage.id}
-                coordinate={{
-                  latitude: garage.latitude,
-                  longitude: garage.longitude,
-                }}
-                title={garage.name}
-                description={`${garage.rating.toFixed(1)}⭐ - ${
-                  garage.isOpen ? 'Ouvert' : 'Fermé'
-                } - ${garage?.distance?.toFixed(2)} km`}
-                onPress={() => handleMarkerPress(garage)}
-                pinColor={garage.isOpen ? '#059669' : '#64748b'}
-              />
-            ))}
+            {nearbyGarages.map((garage, index) => {
+              console.log(garage);
+              return (
+                <Marker
+                  key={`garage-${garage._id}-${index}`}
+                  coordinate={{
+                    latitude: garage?.location?.latitude || 0,
+                    longitude: garage?.location?.longitude || 0,
+                  }}
+                  title={garage?.name}
+                  description={`${garage?.rating.toFixed(1)}⭐ - ${
+                    garage?.isOpen ? 'Ouvert' : 'Fermé'
+                  } - ${garage?.distance?.toFixed(2)} km`}
+                  onPress={() => handleMarkerPress(garage)}
+                  pinColor={garage?.isOpen ? '#059669' : '#64748b'}
+                />
+              );
+            })}
           </MapView>
 
           <TouchableOpacity

@@ -10,7 +10,12 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: Omit<User, 'id'>) => Promise<boolean>;
-  registerGarage: (userData: Omit<User, 'id'> & { location: { latitude: number; longitude: number; address: string }, services: string[] }) => Promise<boolean>;
+  registerGarage: (
+    userData: Omit<User, 'id'> & {
+      location: { latitude: number; longitude: number; address: string };
+      services: string[];
+    }
+  ) => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
@@ -24,7 +29,9 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -36,17 +43,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const userData = await AsyncStorage.getItem('currentUser');
       const token = await AsyncStorage.getItem('authToken');
-      
+
       if (userData && token) {
         setCurrentUser(JSON.parse(userData));
         // Vérifier la validité du token en appelant l'API
         try {
           const response = await fetch(`${API_URL}/auth/profile`, {
             headers: {
-              'Authorization': `Bearer ${token}`
-            }
+              Authorization: `Bearer ${token}`,
+            },
           });
-          
+
           if (!response.ok) {
             // Token invalide, déconnecter l'utilisateur
             await logout();
@@ -68,15 +75,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        Alert.alert('Erreur de connexion', data.message || 'Email ou mot de passe incorrect');
+        Alert.alert(
+          'Erreur de connexion',
+          data.message || 'Email ou mot de passe incorrect'
+        );
         return false;
       }
 
@@ -87,7 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: data.user.email,
         phone: data.user.phone,
         role: data.user.role,
-        location: data.user.location
+        location: data.user.location,
       };
 
       setCurrentUser(user);
@@ -96,68 +106,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return true;
     } catch (error) {
       console.error('Login error:', error);
-      Alert.alert('Erreur de connexion', 'Impossible de se connecter au serveur');
+      Alert.alert(
+        'Erreur de connexion',
+        'Impossible de se connecter au serveur'
+      );
       return false;
     }
   };
 
   const register = async (userData: Omit<User, 'id'>): Promise<boolean> => {
+    console.log('userData front : ', userData);
     try {
       const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...userData,
-          role: 'client'
-        })
+          // role: 'client'
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        Alert.alert('Erreur d\'inscription', data.message || 'Impossible de créer le compte');
-        return false;
-      }
-
-      // Créer un objet utilisateur à partir de la réponse de l'API
-      const user: User = {
-        id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-        phone: data.user.phone,
-        role: data.user.role
-      };
-
-      setCurrentUser(user);
-      await AsyncStorage.setItem('currentUser', JSON.stringify(user));
-      await AsyncStorage.setItem('authToken', data.token);
-      return true;
-    } catch (error) {
-      console.error('Registration error:', error);
-      Alert.alert('Erreur d\'inscription', 'Impossible de se connecter au serveur');
-      return false;
-    }
-  };
-
-  const registerGarage = async (userData: Omit<User, 'id'> & { location: { latitude: number; longitude: number; address: string }, services: string[] }): Promise<boolean> => {
-    try {
-      // Afficher les données pour le débogage
-      console.log('Données d\'inscription garage:', JSON.stringify(userData));
-      
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(userData) // Envoyer les données telles quelles sans les modifier
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        Alert.alert('Erreur d\'inscription', data.message || 'Impossible de créer le compte garage');
+        console.log(data.message);
+        Alert.alert(
+          "Erreur d'inscription",
+          data.message || 'Impossible de créer le compte'
+        );
         return false;
       }
 
@@ -168,7 +146,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: data.user.email,
         phone: data.user.phone,
         role: data.user.role,
-        location: data.user.location
+      };
+
+      setCurrentUser(user);
+      await AsyncStorage.setItem('currentUser', JSON.stringify(user));
+      await AsyncStorage.setItem('authToken', data.token);
+      return true;
+    } catch (error) {
+      console.error('Registration error:', error);
+      Alert.alert(
+        "Erreur d'inscription",
+        'Impossible de se connecter au serveur'
+      );
+      return false;
+    }
+  };
+
+  const registerGarage = async (
+    userData: Omit<User, 'id'> & {
+      location: { latitude: number; longitude: number; address: string };
+      services: string[];
+    }
+  ): Promise<boolean> => {
+    try {
+      // Afficher les données pour le débogage
+      console.log("Données d'inscription garage:", JSON.stringify(userData));
+
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData), // Envoyer les données telles quelles sans les modifier
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        Alert.alert(
+          "Erreur d'inscription",
+          data.message || 'Impossible de créer le compte garage'
+        );
+        return false;
+      }
+
+      // Créer un objet utilisateur à partir de la réponse de l'API
+      const user: User = {
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        phone: data.user.phone,
+        role: data.user.role,
+        location: data.user.location,
       };
 
       setCurrentUser(user);
@@ -177,7 +206,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return true;
     } catch (error) {
       console.error('Garage registration error:', error);
-      Alert.alert('Erreur d\'inscription', 'Impossible de se connecter au serveur');
+      Alert.alert(
+        "Erreur d'inscription",
+        'Impossible de se connecter au serveur'
+      );
       return false;
     }
   };
@@ -186,12 +218,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // Clear user state
       setCurrentUser(null);
-      
+
       // Remove all authentication-related items from storage
       await AsyncStorage.removeItem('currentUser');
       await AsyncStorage.removeItem('authToken');
       await AsyncStorage.multiRemove(['currentUser', 'authToken']);
-      
+
       // Redirect to login screen
       router.replace('/auth');
     } catch (error) {
@@ -200,14 +232,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{
-      currentUser,
-      isLoading,
-      login,
-      register,
-      registerGarage,
-      logout,
-    }}>
+    <AuthContext.Provider
+      value={{
+        currentUser,
+        isLoading,
+        login,
+        register,
+        registerGarage,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

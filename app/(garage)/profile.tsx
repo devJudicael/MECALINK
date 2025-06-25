@@ -10,14 +10,18 @@ import {
   ScrollView,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
-import { User, Mail, Phone, LogOut, Wrench, MapPin, Clock } from 'lucide-react-native';
-import { Garage } from '@/types';
+import { User, Mail, Phone, LogOut, Wrench, MapPin, Clock, Navigation } from 'lucide-react-native';
+import { Garage, Location } from '@/types';
+import * as ExpoLocation from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../config/api';
 
 export default function GarageProfileScreen() {
   const { currentUser, logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [garageData, setGarageData] = useState<Garage | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [updatingLocation, setUpdatingLocation] = useState(false);
 
   // Charger les données du garage au chargement de l'écran
   useEffect(() => {
@@ -64,6 +68,103 @@ export default function GarageProfileScreen() {
         onPress: logout,
       },
     ]);
+  };
+
+  const updateGarageLocation = async () => {
+    if (!currentUser || !garageData) return;
+    
+    try {
+      // Demander la permission d'accéder à la localisation
+      const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission refusée',
+          "L'accès à la localisation est nécessaire pour définir la position de votre garage."
+        );
+        return;
+      }
+      
+      setUpdatingLocation(true);
+      
+      // Obtenir la position actuelle
+      const location = await ExpoLocation.getCurrentPositionAsync({
+        accuracy: ExpoLocation.Accuracy.High
+      });
+      
+      // Obtenir l'adresse à partir des coordonnées
+      const reverseGeocode = await ExpoLocation.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude
+      });
+      
+      let address = 'Adresse non disponible';
+      
+      if (reverseGeocode.length > 0) {
+        const addressData = reverseGeocode[0];
+        address = `${addressData.street || ''} ${addressData.streetNumber || ''}, ${addressData.city || ''}, ${addressData.region || ''}, ${addressData.country || ''}`
+          .replace(/,\s*,/g, ',')
+          .replace(/^\s*,\s*|\s*,\s*$/g, '')
+          .trim();
+      }
+      
+      // Récupérer le token d'authentification
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        Alert.alert('Erreur', 'Vous devez être connecté pour effectuer cette action');
+        return;
+      }
+      
+      // Créer l'objet de localisation
+      const newLocation: Location = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        address: address
+      };
+      
+      // Mettre à jour les données du garage avec la nouvelle position
+      const updatedGarageData = {
+        ...garageData,
+        latitude: newLocation.latitude,
+        longitude: newLocation.longitude,
+        address: newLocation.address
+      };
+      
+      // Mettre à jour les données du garage dans l'API
+      const response = await fetch(`${API_URL}/garages/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          location: newLocation
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erreur lors de la mise à jour de la position');
+      }
+      
+      // Mettre à jour les données locales
+      setGarageData(updatedGarageData);
+      
+      // Mettre à jour les données de l'utilisateur dans AsyncStorage
+      const userData = await AsyncStorage.getItem('currentUser');
+      if (userData) {
+        const user = JSON.parse(userData);
+        user.location = newLocation;
+        await AsyncStorage.setItem('currentUser', JSON.stringify(user));
+      }
+      
+      Alert.alert('Succès', 'La position de votre garage a été mise à jour avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de la position:', error);
+      Alert.alert('Erreur', 'Impossible de mettre à jour la position du garage');
+    } finally {
+      setUpdatingLocation(false);
+    }
   };
 
   if (loading) {
@@ -150,7 +251,23 @@ export default function GarageProfileScreen() {
                   <Text style={styles.infoValue}>{garageData.address}</Text>
                 </View>
               </View>
-
+              
+              <View style={styles.separator} />
+              
+              <TouchableOpacity 
+                style={styles.locationButton} 
+                onPress={updateGarageLocation}
+                disabled={updatingLocation}
+              >
+                <Navigation size={20} color="#fff" />
+                <Text style={styles.locationButtonText}>
+                  {updatingLocation ? 'Mise à jour...' : 'Utiliser ma position actuelle'}
+                </Text>
+                {updatingLocation && (
+                  <ActivityIndicator size="small" color="#fff" style={styles.locationLoader} />
+                )}
+              </TouchableOpacity>
+              
               <View style={styles.separator} />
 
               <View style={styles.infoItem}>
@@ -320,6 +437,23 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#e2e8f0',
     marginVertical: 16,
+  },
+  locationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#3b82f6',
+    padding: 12,
+    borderRadius: 8,
+    gap: 12,
+  },
+  locationButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  locationLoader: {
+    marginLeft: 10,
   },
   logoutButton: {
     flexDirection: 'row',

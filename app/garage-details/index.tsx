@@ -34,10 +34,10 @@ export default function GarageDetailsScreen() {
   const { currentUser } = useAuth();
   const { createRequest } = useService();
   const { getGarageById, selectedGarage, setSelectedGarage } = useGarageStore();
-  
+
   const [loading, setLoading] = useState(true);
   const [garage, setGarage] = useState(null);
-  
+
   useEffect(() => {
     const fetchGarageDetails = async () => {
       setLoading(true);
@@ -56,9 +56,9 @@ export default function GarageDetailsScreen() {
         setLoading(false);
       }
     };
-    
+
     fetchGarageDetails();
-    
+
     return () => {
       setSelectedGarage(null);
     };
@@ -82,7 +82,7 @@ export default function GarageDetailsScreen() {
       </SafeAreaView>
     );
   }
-  
+
   if (!garage) {
     return (
       <SafeAreaView style={styles.container}>
@@ -98,7 +98,7 @@ export default function GarageDetailsScreen() {
         <View style={styles.errorContainer}>
           <AlertTriangle size={48} color="#dc2626" />
           <Text style={styles.errorText}>Garage non trouvé</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.backToListButton}
             onPress={() => router.back()}
           >
@@ -135,9 +135,9 @@ export default function GarageDetailsScreen() {
       // Get current location
       const { status } = await Location.requestForegroundPermissionsAsync();
       let userLocation = {
-        latitude: 48.8566,
-        longitude: 2.3522,
-        address: 'Paris, France',
+        latitude: 0,
+        longitude: 0,
+        address: 'CI',
       };
 
       if (status === 'granted') {

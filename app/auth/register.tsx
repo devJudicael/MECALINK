@@ -21,7 +21,7 @@ export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [role, setRole] = useState<'client' | 'garage'>('client');
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState('Abidjan');
   const [isLoading, setIsLoading] = useState(false);
 
   const { register, registerGarage } = useAuth();
@@ -57,20 +57,20 @@ export default function RegisterScreen() {
           password,
           role,
           location: {
-            latitude: 48.8566, // Coordonnées par défaut (Paris)
-            longitude: 2.3522, // Coordonnées par défaut (Paris)
+            latitude: 0,
+            longitude: 0,
             address: address,
           },
-          services: [], // Services par défaut, à compléter ultérieurement
+          services: [],
         });
         if (success) {
           router.replace('/(garage)');
         }
       }
 
-      if (!success) {
-        Alert.alert('Erreur', "Erreur lors de l'inscription");
-      }
+      // if (!success) {
+      //   Alert.alert('Erreur', "Erreur lors de l'inscription");
+      // }
     } catch (error) {
       Alert.alert('Erreur', 'Une erreur est survenue');
     } finally {
