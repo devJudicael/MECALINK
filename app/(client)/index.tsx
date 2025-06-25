@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import type { Garage } from '@/types';
-import { MapPin, Navigation } from 'lucide-react-native';
+import { Navigation } from 'lucide-react-native';
 import { useGarageStore } from '../../stores/garages';
 
 export default function ClientMapScreen() {
@@ -21,6 +21,7 @@ export default function ClientMapScreen() {
   );
   const [region, setRegion] = useState<Region | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
   const {
     fetchNearbyGarages,
     nearbyGarages,
@@ -29,15 +30,11 @@ export default function ClientMapScreen() {
   } = useGarageStore();
   const router = useRouter();
 
-  // Utiliser useRef pour suivre si l'effet a déjà été exécuté
-  const hasInitialized = React.useRef(false);
+  const hasInitialized = useRef(false);
 
-  // Obtenir la géolocalisation une fois
   useEffect(() => {
-    // Éviter les exécutions multiples
     if (hasInitialized.current) return;
-    
-    // fn pour demander les permissions de localisation
+
     const getLocationPermission = async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
@@ -50,30 +47,33 @@ export default function ClientMapScreen() {
           return;
         }
 
-        // recuperer la position de l'utilisateur
         const currentLocation = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
         });
 
-        setLocation(currentLocation);
+        const coords = currentLocation.coords;
 
+        setLocation(currentLocation);
         setRegion({
-          latitude: currentLocation.coords.latitude,
-          longitude: currentLocation.coords.longitude,
+          latitude: coords.latitude,
+          longitude: coords.longitude,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         });
 
-        // récupérer les garages à proximité (rayon de 10km par défaut)
-        await fetchNearbyGarages(currentLocation);
-        
-        // Marquer comme initialisé après le premier chargement réussi
+        await fetchNearbyGarages({
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        });
+
         hasInitialized.current = true;
       } catch (error) {
-        console.error('Error getting location:', error);
-
+        console.error(
+          'Erreur lors de la récupération de la localisation :',
+          error
+        );
         setRegion({
-          latitude: 48.8566,
+          latitude: 48.8566, // Paris fallback
           longitude: 2.3522,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
@@ -84,7 +84,7 @@ export default function ClientMapScreen() {
     };
 
     getLocationPermission();
-  }, []); // Tableau de dépendances vide pour n'exécuter qu'une seule fois
+  }, []);
 
   const handleMarkerPress = (garage: Garage) => {
     router.push({
@@ -93,7 +93,6 @@ export default function ClientMapScreen() {
     });
   };
 
-  // fn pour recentrer la map sur la position de l'utilisateur
   const centerOnUserLocation = () => {
     if (location && region) {
       setRegion({
@@ -113,7 +112,6 @@ export default function ClientMapScreen() {
     );
   }
 
-  // Afficher un message d'erreur si nécessaire
   if (error) {
     Alert.alert(
       'Erreur de connexion',
@@ -140,16 +138,24 @@ export default function ClientMapScreen() {
             showsMyLocationButton={false}
           >
             {nearbyGarages.map((garage, index) => {
-              console.log(garage);
+              const latitude = garage?.location?.latitude;
+              const longitude = garage?.location?.longitude;
+
+              if (
+                typeof latitude !== 'number' ||
+                typeof longitude !== 'number' ||
+                isNaN(latitude) ||
+                isNaN(longitude)
+              ) {
+                return null;
+              }
+
               return (
                 <Marker
                   key={`garage-${garage._id}-${index}`}
-                  coordinate={{
-                    latitude: garage?.location?.latitude || 0,
-                    longitude: garage?.location?.longitude || 0,
-                  }}
+                  coordinate={{ latitude, longitude }}
                   title={garage?.name}
-                  description={`${garage?.rating.toFixed(1)}⭐ - ${
+                  description={`${garage?.rating?.toFixed(1)}⭐ - ${
                     garage?.isOpen ? 'Ouvert' : 'Fermé'
                   } - ${garage?.distance?.toFixed(2)} km`}
                   onPress={() => handleMarkerPress(garage)}
@@ -170,6 +176,38 @@ export default function ClientMapScreen() {
     </SafeAreaView>
   );
 }
+
+// const styles = StyleSheet.create({
+//   container: { flex: 1, backgroundColor: '#fff' },
+//   header: { padding: 16 },
+//   title: { fontSize: 20, fontWeight: 'bold', color: '#111' },
+//   subtitle: { fontSize: 14, color: '#666', marginTop: 4 },
+//   mapContainer: { flex: 1 },
+//   map: { flex: 1 },
+//   locationButton: {
+//     position: 'absolute',
+//     bottom: 20,
+//     right: 20,
+//     backgroundColor: 'white',
+//     borderRadius: 50,
+//     padding: 12,
+//     elevation: 3,
+//     shadowColor: '#000',
+//     shadowOpacity: 0.1,
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowRadius: 4,
+//   },
+//   loadingContainer: {
+//     flex: 1,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+//   loadingText: {
+//     marginTop: 12,
+//     fontSize: 16,
+//     color: '#666',
+//   },
+// });
 
 const styles = StyleSheet.create({
   container: {
