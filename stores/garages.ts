@@ -10,7 +10,10 @@ type GarageStore = {
   selectedGarage: Garage | null;
   isLoading: boolean;
   error: string | null;
-  fetchNearbyGarages: (position: Location.LocationObject, radius?: number) => Promise<void>;
+  fetchNearbyGarages: (
+    position: Location.LocationObject,
+    radius?: number
+  ) => Promise<void>;
   getGarageById: (id: string) => Promise<Garage | null>;
   setSelectedGarage: (garage: Garage | null) => void;
 };
@@ -21,39 +24,47 @@ export const useGarageStore = create<GarageStore>((set, get) => ({
   isLoading: false,
   error: null,
 
-  fetchNearbyGarages: async (position: Location.LocationObject, radius = 10) => {
+  fetchNearbyGarages: async (
+    position: Location.LocationObject,
+    radius = 10
+  ) => {
+    // console.log('fetch garages');
     const { latitude, longitude } = position.coords;
-    
+
     set({ isLoading: true, error: null });
-    
+
     try {
       // Appel à l'API pour récupérer les garages à proximité
       const response = await fetch(
         `${API_URL}/garages/nearby?latitude=${latitude}&longitude=${longitude}&radius=${radius}`
       );
-      
+
       if (!response.ok) {
         throw new Error('Impossible de récupérer les garages à proximité');
       }
-      
+
       const garages = await response.json();
-      
+
       // Si l'API ne renvoie pas la distance, la calculer localement
       const garagesWithDistance = garages.map((garage: Garage) => ({
         ...garage,
-        distance: garage.distance || distanceBetweenTwo(
-          { latitude, longitude },
-          { latitude: garage.latitude, longitude: garage.longitude }
-        )
+        distance:
+          garage.distance ||
+          distanceBetweenTwo(
+            { latitude, longitude },
+            { latitude: garage.latitude, longitude: garage.longitude }
+          ),
       }));
-      
-      set({ 
-        nearbyGarages: garagesWithDistance.sort((a: Garage, b: Garage) => a.distance! - b.distance!),
-        isLoading: false 
+
+      set({
+        nearbyGarages: garagesWithDistance.sort(
+          (a: Garage, b: Garage) => a.distance! - b.distance!
+        ),
+        isLoading: false,
       });
     } catch (error) {
       console.error('Error fetching nearby garages:', error);
-      
+
       // En cas d'erreur, générer des garages fictifs pour la démo
       const mockGarages = Array.from({ length: 5 }, (_, index) => {
         const garageLatitude = latitude + (Math.random() - 0.5) * 0.01;
@@ -83,12 +94,13 @@ export const useGarageStore = create<GarageStore>((set, get) => ({
         };
       });
 
-      set({ 
+      set({
         nearbyGarages: mockGarages.sort((a, b) => a.distance! - b.distance!),
         isLoading: false,
-        error: 'Impossible de se connecter au serveur. Affichage de données fictives.'
+        error:
+          'Impossible de se connecter au serveur. Affichage de données fictives.',
       });
-      
+
       Alert.alert(
         'Erreur de connexion',
         'Impossible de récupérer les garages depuis le serveur. Des données fictives sont affichées à la place.'
@@ -100,19 +112,19 @@ export const useGarageStore = create<GarageStore>((set, get) => ({
     try {
       // Vérifier d'abord si le garage est déjà dans le store
       const { nearbyGarages } = get();
-      const cachedGarage = nearbyGarages.find(garage => garage.id === id);
-      
+      const cachedGarage = nearbyGarages.find((garage) => garage.id === id);
+
       if (cachedGarage) {
         return cachedGarage;
       }
-      
+
       // Sinon, appeler l'API
       const response = await fetch(`${API_URL}/garages/${id}`);
-      
+
       if (!response.ok) {
         throw new Error('Impossible de récupérer les détails du garage');
       }
-      
+
       const garage = await response.json();
       return garage;
     } catch (error) {

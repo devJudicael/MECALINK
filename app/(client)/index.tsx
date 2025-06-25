@@ -28,14 +28,14 @@ export default function ClientMapScreen() {
     isLoading: isLoadingGarages,
     error,
   } = useGarageStore();
-  const router = useRouter();
 
-  const hasInitialized = useRef(false);
+  const router = useRouter();
+  const hasInitialized = useRef(false); // S'assurer d'une seule exécution
 
   useEffect(() => {
     if (hasInitialized.current) return;
 
-    const getLocationPermission = async () => {
+    const getLocationAndGarages = async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
@@ -51,29 +51,24 @@ export default function ClientMapScreen() {
           accuracy: Location.Accuracy.High,
         });
 
-        const coords = currentLocation.coords;
-
-        setLocation(currentLocation);
-        setRegion({
-          latitude: coords.latitude,
-          longitude: coords.longitude,
+        const userRegion = {
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
-        });
+        };
 
-        await fetchNearbyGarages({
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        });
+        setLocation(currentLocation);
+        setRegion(userRegion);
 
-        hasInitialized.current = true;
-      } catch (error) {
-        console.error(
-          'Erreur lors de la récupération de la localisation :',
-          error
-        );
+        await fetchNearbyGarages(currentLocation); // Appel unique ici
+
+        hasInitialized.current = true; // Marquer comme fait
+      } catch (err) {
+        console.error('Erreur localisation :', err);
+        // Coordonnées de fallback
         setRegion({
-          latitude: 48.8566, // Paris fallback
+          latitude: 48.8566,
           longitude: 2.3522,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
@@ -83,8 +78,8 @@ export default function ClientMapScreen() {
       }
     };
 
-    getLocationPermission();
-  }, []);
+    getLocationAndGarages();
+  }, []); // Exécute une seule fois
 
   const handleMarkerPress = (garage: Garage) => {
     router.push({
@@ -94,12 +89,12 @@ export default function ClientMapScreen() {
   };
 
   const centerOnUserLocation = () => {
-    if (location && region) {
-      setRegion({
-        ...region,
+    if (location) {
+      setRegion((prevRegion) => ({
+        ...prevRegion!,
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-      });
+      }));
     }
   };
 
@@ -138,22 +133,14 @@ export default function ClientMapScreen() {
             showsMyLocationButton={false}
           >
             {nearbyGarages.map((garage, index) => {
-              const latitude = garage?.location?.latitude;
-              const longitude = garage?.location?.longitude;
-
-              if (
-                typeof latitude !== 'number' ||
-                typeof longitude !== 'number' ||
-                isNaN(latitude) ||
-                isNaN(longitude)
-              ) {
-                return null;
-              }
-
+              // console.log(garage);
               return (
                 <Marker
                   key={`garage-${garage._id}-${index}`}
-                  coordinate={{ latitude, longitude }}
+                  coordinate={{
+                    latitude: garage?.location?.latitude || 0,
+                    longitude: garage?.location?.longitude || 0,
+                  }}
                   title={garage?.name}
                   description={`${garage?.rating?.toFixed(1)}⭐ - ${
                     garage?.isOpen ? 'Ouvert' : 'Fermé'
@@ -176,38 +163,6 @@ export default function ClientMapScreen() {
     </SafeAreaView>
   );
 }
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: '#fff' },
-//   header: { padding: 16 },
-//   title: { fontSize: 20, fontWeight: 'bold', color: '#111' },
-//   subtitle: { fontSize: 14, color: '#666', marginTop: 4 },
-//   mapContainer: { flex: 1 },
-//   map: { flex: 1 },
-//   locationButton: {
-//     position: 'absolute',
-//     bottom: 20,
-//     right: 20,
-//     backgroundColor: 'white',
-//     borderRadius: 50,
-//     padding: 12,
-//     elevation: 3,
-//     shadowColor: '#000',
-//     shadowOpacity: 0.1,
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowRadius: 4,
-//   },
-//   loadingContainer: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   loadingText: {
-//     marginTop: 12,
-//     fontSize: 16,
-//     color: '#666',
-//   },
-// });
 
 const styles = StyleSheet.create({
   container: {
@@ -249,25 +204,6 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  markerContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  markerClosed: {
-    backgroundColor: '#f1f5f9',
-  },
   locationButton: {
     position: 'absolute',
     bottom: 20,
@@ -279,10 +215,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
