@@ -123,10 +123,10 @@ export default function GaragesListScreen() {
           )}
         </View>
 
-        <View style={styles.hoursContainer}>
+        {/* <View style={styles.hoursContainer}>
           <Clock size={16} color="#64748b" />
           <Text style={styles.hours}>{garage.openingHours}</Text>
-        </View>
+        </View> */}
 
         <View style={styles.servicesContainer}>
           {garage.services.slice(0, 3).map((service, index) => (

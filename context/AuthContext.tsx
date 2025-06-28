@@ -119,7 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         address: data?.garage?.address,
       };
 
-      console.log('--- user front --- : ', JSON.stringify(user, null, 2));
+      // console.log('--- user front --- : ', JSON.stringify(user, null, 2));
 
       setCurrentUser(user);
       await AsyncStorage.setItem('currentUser', JSON.stringify(user));

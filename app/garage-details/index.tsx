@@ -216,10 +216,10 @@ export default function GarageDetailsScreen() {
                 <MapPin size={20} color="#64748b" />
                 <Text style={styles.infoText}>{garage.address}</Text>
               </View>
-              <View style={styles.infoItem}>
+              {/* <View style={styles.infoItem}>
                 <Clock size={20} color="#64748b" />
                 <Text style={styles.infoText}>{garage.openingHours}</Text>
-              </View>
+              </View> */}
               <View style={styles.infoItem}>
                 <Phone size={20} color="#64748b" />
                 <Text style={styles.infoText}>{garage.phone}</Text>
@@ -232,7 +232,7 @@ export default function GarageDetailsScreen() {
 
             <Text style={styles.description}>{garage.description}</Text>
 
-            <View style={styles.servicesContainer}>
+            {/* <View style={styles.servicesContainer}>
               <Text style={styles.servicesTitle}>Services proposés</Text>
               <View style={styles.servicesList}>
                 {garage.services.map((service: any, index: number) => (
@@ -241,7 +241,7 @@ export default function GarageDetailsScreen() {
                   </View>
                 ))}
               </View>
-            </View>
+            </View> */}
           </View>
 
           <View style={styles.requestForm}>

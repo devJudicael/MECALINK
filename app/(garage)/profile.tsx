@@ -37,7 +37,7 @@ export default function GarageProfileScreen() {
     const loadGarageData = async () => {
       if (!currentUser) return;
 
-      console.log('--- currentUser ---', JSON.stringify(currentUser, null, 2));
+      // console.log('--- currentUser ---', JSON.stringify(currentUser, null, 2));
 
       try {
         setLoading(true);
@@ -172,7 +172,7 @@ export default function GarageProfileScreen() {
       const updatedGarageWithLocation = {
         ...garageData,
         location: newLocation,
-        address: newLocation.address
+        address: newLocation.address,
       };
       setGarageData(updatedGarageWithLocation);
 
@@ -183,7 +183,7 @@ export default function GarageProfileScreen() {
         const newUser = {
           ...user,
           location: newLocation,
-          address: newLocation.address
+          address: newLocation.address,
         };
         await AsyncStorage.setItem('currentUser', JSON.stringify(newUser));
       }
