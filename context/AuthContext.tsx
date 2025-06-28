@@ -111,12 +111,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Créer un objet utilisateur à partir de la réponse de l'API
       const user: User = {
         id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-        phone: data.user.phone,
-        role: data.user.role,
-        location: data.garage.location,
-        address: data.garage.address,
+        name: data?.user?.name,
+        email: data?.user?.email,
+        phone: data?.user?.phone,
+        role: data?.user?.role,
+        location: data?.garage?.location,
+        address: data?.garage?.address,
       };
 
       console.log('--- user front --- : ', JSON.stringify(user, null, 2));

@@ -145,8 +145,7 @@ export default function GarageProfileScreen() {
       // Mettre à jour les données du garage avec la nouvelle position
       const updatedGarageData = {
         ...garageData,
-        latitude: newLocation.latitude,
-        longitude: newLocation.longitude,
+        location: newLocation,
         address: newLocation.address,
       };
 
@@ -169,15 +168,24 @@ export default function GarageProfileScreen() {
         );
       }
 
-      // Mettre à jour les données locales
-      setGarageData(updatedGarageData);
+      // Mettre à jour les données locales avec la nouvelle position
+      const updatedGarageWithLocation = {
+        ...garageData,
+        location: newLocation,
+        address: newLocation.address
+      };
+      setGarageData(updatedGarageWithLocation);
 
       // Mettre à jour les données de l'utilisateur dans AsyncStorage
       const userData = await AsyncStorage.getItem('currentUser');
       if (userData) {
         const user = JSON.parse(userData);
-        user.location = newLocation;
-        await AsyncStorage.setItem('currentUser', JSON.stringify(user));
+        const newUser = {
+          ...user,
+          location: newLocation,
+          address: newLocation.address
+        };
+        await AsyncStorage.setItem('currentUser', JSON.stringify(newUser));
       }
 
       Alert.alert(
