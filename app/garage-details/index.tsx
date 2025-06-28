@@ -39,11 +39,17 @@ export default function GarageDetailsScreen() {
   const [garage, setGarage] = useState(null);
 
   useEffect(() => {
+    // console.log('-- garage id2 -- ', garageId);
+
     const fetchGarageDetails = async () => {
       setLoading(true);
       try {
         const garageDetails = await getGarageById(garageId as string);
         if (garageDetails) {
+          // console.log(
+          //   '-- garageDetails  -- ',
+          //   JSON.stringify(garageDetails, null, 2)
+          // );
           setGarage(garageDetails);
           setSelectedGarage(garageDetails);
         } else {
@@ -65,11 +71,7 @@ export default function GarageDetailsScreen() {
   }, [garageId]);
 
   const [description, setDescription] = useState('');
-  const [vehicleMake, setVehicleMake] = useState('');
-  const [vehicleModel, setVehicleModel] = useState('');
-  const [vehicleYear, setVehicleYear] = useState('');
-  const [licensePlate, setLicensePlate] = useState('');
-  const [urgency, setUrgency] = useState<'low' | 'medium' | 'high'>('medium');
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (loading) {
@@ -118,13 +120,7 @@ export default function GarageDetailsScreen() {
       return;
     }
 
-    if (
-      !description.trim() ||
-      !vehicleMake.trim() ||
-      !vehicleModel.trim() ||
-      !vehicleYear.trim() ||
-      !licensePlate.trim()
-    ) {
+    if (!description.trim()) {
       Alert.alert('Erreur', 'Veuillez remplir tous les champs');
       return;
     }
@@ -166,17 +162,10 @@ export default function GarageDetailsScreen() {
         clientName: currentUser.name,
         clientPhone: currentUser.phone,
         clientEmail: currentUser.email,
-        garageId: garage.id,
+        garageId: garage._id,
         garageName: garage.name,
         description: description.trim(),
         location: userLocation,
-        vehicleInfo: {
-          make: vehicleMake.trim(),
-          model: vehicleModel.trim(),
-          year: vehicleYear.trim(),
-          licensePlate: licensePlate.trim(),
-        },
-        urgency,
       });
 
       Alert.alert(
@@ -270,86 +259,6 @@ export default function GarageDetailsScreen() {
                 textAlignVertical="top"
               />
             </View>
-
-            {/* <View style={styles.vehicleSection}>
-              <Text style={styles.sectionTitle}>Informations du véhicule</Text>
-
-              <View style={styles.inputRow}>
-                <View style={[styles.inputGroup, styles.halfWidth]}>
-                  <Text style={styles.inputLabel}>Marque *</Text>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="Ex: Renault"
-                    value={vehicleMake}
-                    onChangeText={setVehicleMake}
-                  />
-                </View>
-                <View style={[styles.inputGroup, styles.halfWidth]}>
-                  <Text style={styles.inputLabel}>Modèle *</Text>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="Ex: Clio"
-                    value={vehicleModel}
-                    onChangeText={setVehicleModel}
-                  />
-                </View>
-              </View>
-
-              <View style={styles.inputRow}>
-                <View style={[styles.inputGroup, styles.halfWidth]}>
-                  <Text style={styles.inputLabel}>Année *</Text>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="Ex: 2020"
-                    value={vehicleYear}
-                    onChangeText={setVehicleYear}
-                    keyboardType="numeric"
-                  />
-                </View>
-                <View style={[styles.inputGroup, styles.halfWidth]}>
-                  <Text style={styles.inputLabel}>Plaque *</Text>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="Ex: AB-123-CD"
-                    value={licensePlate}
-                    onChangeText={setLicensePlate}
-                    autoCapitalize="characters"
-                  />
-                </View>
-              </View>
-            </View> */}
-
-            {/* <View style={styles.urgencySection}>
-              <Text style={styles.sectionTitle}>Niveau d'urgence</Text>
-              <View style={styles.urgencyButtons}>
-                {[
-                  { key: 'low', label: 'Faible', color: '#059669' },
-                  { key: 'medium', label: 'Moyen', color: '#EA580C' },
-                  { key: 'high', label: 'Urgent', color: '#dc2626' },
-                ].map((option) => (
-                  <TouchableOpacity
-                    key={option.key}
-                    style={[
-                      styles.urgencyButton,
-                      urgency === option.key && {
-                        backgroundColor: option.color,
-                      },
-                    ]}
-                    onPress={() => setUrgency(option.key as any)}
-                  >
-                    <Text
-                      style={[
-                        styles.urgencyButtonText,
-                        urgency === option.key &&
-                          styles.urgencyButtonTextActive,
-                      ]}
-                    >
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View> */}
 
             <TouchableOpacity
               style={[

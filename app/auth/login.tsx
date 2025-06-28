@@ -32,12 +32,17 @@ export default function LoginScreen() {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password);
-      if (success) {
+      const { success, userRole } = await login(email, password);
+      if (success && userRole === 'client') {
         router.replace('/(client)');
+      } else if (success && userRole === 'garage') {
+        router.replace('/(garage)');
       } else {
         Alert.alert('Erreur', 'Email ou mot de passe incorrect');
       }
+
+      // console.log(success, userRole);
+      return;
     } catch (error) {
       Alert.alert('Erreur', 'Une erreur est survenue');
     } finally {

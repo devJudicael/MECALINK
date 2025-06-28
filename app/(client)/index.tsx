@@ -82,6 +82,8 @@ export default function ClientMapScreen() {
   }, []); // Exécute une seule fois
 
   const handleMarkerPress = (garage: Garage) => {
+    console.log('marker press', JSON.stringify(garage, null, 2));
+    // return;
     router.push({
       pathname: '/garage-details',
       params: { garageId: garage.id },
@@ -119,7 +121,7 @@ export default function ClientMapScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Garages à proximité</Text>
         <Text style={styles.subtitle}>
-          {nearbyGarages.length} garages trouvés
+          {nearbyGarages.length} garage(s) trouvé(s)
         </Text>
       </View>
 
@@ -133,7 +135,10 @@ export default function ClientMapScreen() {
             showsMyLocationButton={false}
           >
             {nearbyGarages.map((garage, index) => {
-              // console.log(garage);
+              // console.log(
+              //   '-- nearbyGarages -- ',
+              //   JSON.stringify(garage, null, 2)
+              // );
               return (
                 <Marker
                   key={`garage-${garage._id}-${index}`}

@@ -31,7 +31,7 @@ export default function HistoryScreen() {
         setRequests(clientRequests);
       }
     };
-    
+
     loadRequests();
   }, [currentUser, getRequestsForClient]);
 
@@ -88,7 +88,7 @@ export default function HistoryScreen() {
   };
 
   const renderRequestItem = ({ item: request }: { item: ServiceRequest }) => (
-    <View style={styles.requestCard}>
+    <View style={styles.requestCard} key={request._id}>
       <View style={styles.requestHeader}>
         <View style={styles.statusContainer}>
           {getStatusIcon(request.status)}
@@ -112,14 +112,6 @@ export default function HistoryScreen() {
       </View>
 
       <Text style={styles.description}>{request.description}</Text>
-
-      {/* <View style={styles.vehicleInfo}>
-        <Text style={styles.vehicleText}>
-          {request.vehicleInfo.make} {request.vehicleInfo.model} (
-          {request.vehicleInfo.year})
-        </Text>
-        <Text style={styles.plateText}>{request.vehicleInfo.licensePlate}</Text>
-      </View> */}
     </View>
   );
 
@@ -140,10 +132,13 @@ export default function HistoryScreen() {
         </View>
       ) : (
         <FlatList
-          data={requests.filter(() => true).sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )}
+          data={requests
+            .filter(() => true)
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+            )}
           renderItem={renderRequestItem}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}

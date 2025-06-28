@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  use,
+} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { User } from '../types';
@@ -8,7 +14,13 @@ import { API_URL } from '../config/api';
 interface AuthContextType {
   currentUser: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{
+    success: boolean;
+    userRole: string | null;
+  }>;
   register: (userData: Omit<User, 'id'>) => Promise<boolean>;
   registerGarage: (
     userData: Omit<User, 'id'> & {
@@ -70,7 +82,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; userRole: string | null }> => {
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
@@ -87,7 +102,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           'Erreur de connexion',
           data.message || 'Email ou mot de passe incorrect'
         );
-        return false;
+        return {
+          success: false,
+          userType: null,
+        };
       }
 
       // Créer un objet utilisateur à partir de la réponse de l'API
@@ -103,14 +121,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setCurrentUser(user);
       await AsyncStorage.setItem('currentUser', JSON.stringify(user));
       await AsyncStorage.setItem('authToken', data.token);
-      return true;
+      return {
+        success: true,
+        userRole: data.user.role,
+      };
     } catch (error) {
       console.error('Login error:', error);
       Alert.alert(
         'Erreur de connexion',
         'Impossible de se connecter au serveur'
       );
-      return false;
+      return {
+        success: false,
+        userRole: null,
+      };
     }
   };
 
@@ -131,7 +155,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const data = await response.json();
 
       if (!response.ok) {
-        console.log(data.message);
         Alert.alert(
           "Erreur d'inscription",
           data.message || 'Impossible de créer le compte'
@@ -170,7 +193,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   ): Promise<boolean> => {
     try {
       // Afficher les données pour le débogage
-      console.log("Données d'inscription garage:", JSON.stringify(userData));
 
       const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',

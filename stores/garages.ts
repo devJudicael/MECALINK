@@ -109,12 +109,21 @@ export const useGarageStore = create<GarageStore>((set, get) => ({
   },
 
   getGarageById: async (id: string) => {
+    // console.log('-- garage id getGarageById -- ', id);
     try {
       // Vérifier d'abord si le garage est déjà dans le store
       const { nearbyGarages } = get();
-      const cachedGarage = nearbyGarages.find((garage) => garage.id === id);
+      // console.log(
+      //   '-- nearbyGarages --',
+      //   JSON.stringify(nearbyGarages, null, 2)
+      // );
+      const cachedGarage = nearbyGarages.find((garage) => garage._id === id);
 
       if (cachedGarage) {
+        // console.log(
+        //   '-- return here cached garage --',
+        //   JSON.stringify(cachedGarage, null, 2)
+        // );
         return cachedGarage;
       }
 

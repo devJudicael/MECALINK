@@ -12,43 +12,54 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useService } from '../../context/ServiceContext';
 import { ServiceRequest } from '../../types';
-import { Clock, MapPin, Phone, CircleCheck as CheckCircle, Circle as XCircle, RefreshCw } from 'lucide-react-native';
+import {
+  Clock,
+  MapPin,
+  Phone,
+  CircleCheck as CheckCircle,
+  Circle as XCircle,
+  RefreshCw,
+} from 'lucide-react-native';
 
 export default function GarageHistoryScreen() {
   const { currentUser } = useAuth();
   const { getRequestsForGarage, refreshRequests } = useService();
-  
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
-  const [processedRequests, setProcessedRequests] = useState<ServiceRequest[]>([]);
-  
+  const [processedRequests, setProcessedRequests] = useState<ServiceRequest[]>(
+    []
+  );
+
   // Charger les demandes au chargement de l'écran
   useEffect(() => {
     loadRequests();
   }, [currentUser]);
-  
+
   // Filtrer les demandes traitées lorsque les demandes changent
   useEffect(() => {
-    setProcessedRequests(requests.filter(request => request.status !== 'pending'));
+    setProcessedRequests(
+      requests.filter((request) => request.status !== 'pending')
+    );
   }, [requests]);
-  
+
   // Fonction pour charger les demandes
   const loadRequests = async () => {
     if (!currentUser) return;
-    
+
     try {
       setLoading(true);
       const fetchedRequests = await getRequestsForGarage(currentUser.id);
       setRequests(fetchedRequests);
     } catch (error) {
       console.error('Error loading requests:', error);
-      Alert.alert('Erreur', 'Impossible de charger l\'historique des demandes');
+      Alert.alert('Erreur', "Impossible de charger l'historique des demandes");
     } finally {
       setLoading(false);
     }
   };
-  
+
   // Fonction pour rafraîchir les demandes
   const handleRefresh = async () => {
     try {
@@ -115,17 +126,20 @@ export default function GarageHistoryScreen() {
       <View style={styles.requestHeader}>
         <View style={styles.statusContainer}>
           {getStatusIcon(request.status)}
-          <Text style={[styles.statusText, { color: getStatusColor(request.status) }]}>
+          <Text
+            style={[
+              styles.statusText,
+              { color: getStatusColor(request.status) },
+            ]}
+          >
             {getStatusText(request.status)}
           </Text>
         </View>
-        <Text style={styles.dateText}>
-          {formatDate(request.createdAt)}
-        </Text>
+        <Text style={styles.dateText}>{formatDate(request.createdAt)}</Text>
       </View>
 
       <Text style={styles.clientName}>{request.clientName}</Text>
-      
+
       <View style={styles.locationContainer}>
         <MapPin size={16} color="#64748b" />
         <Text style={styles.locationText}>{request.location.address}</Text>
@@ -137,30 +151,6 @@ export default function GarageHistoryScreen() {
         <View style={styles.contactItem}>
           <Phone size={16} color="#64748b" />
           <Text style={styles.contactText}>{request.clientPhone}</Text>
-        </View>
-      </View>
-
-      <View style={styles.vehicleInfo}>
-        <Text style={styles.vehicleText}>
-          {request.vehicleInfo.make} {request.vehicleInfo.model} ({request.vehicleInfo.year})
-        </Text>
-        <Text style={styles.plateText}>{request.vehicleInfo.licensePlate}</Text>
-      </View>
-
-      <View style={styles.urgencyContainer}>
-        <View style={[
-          styles.urgencyBadge,
-          request.urgency === 'high' ? styles.urgencyHigh :
-          request.urgency === 'medium' ? styles.urgencyMedium : styles.urgencyLow
-        ]}>
-          <Text style={[
-            styles.urgencyText,
-            request.urgency === 'high' ? styles.urgencyHighText :
-            request.urgency === 'medium' ? styles.urgencyMediumText : styles.urgencyLowText
-          ]}>
-            {request.urgency === 'high' ? 'Urgent' :
-             request.urgency === 'medium' ? 'Moyen' : 'Faible'}
-          </Text>
         </View>
       </View>
     </View>
@@ -183,13 +173,19 @@ export default function GarageHistoryScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Historique des demandes</Text>
         <View style={styles.headerActions}>
-          <Text style={styles.subtitle}>{processedRequests.length} demandes traitées</Text>
-          <TouchableOpacity 
-            style={styles.refreshButton} 
+          <Text style={styles.subtitle}>
+            {processedRequests.length} demande(s) traité(es)
+          </Text>
+          <TouchableOpacity
+            style={styles.refreshButton}
             onPress={handleRefresh}
             disabled={refreshing}
           >
-            <RefreshCw size={20} color="#059669" style={refreshing ? styles.rotating : undefined} />
+            <RefreshCw
+              size={20}
+              color="#059669"
+              style={refreshing ? styles.rotating : undefined}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -204,7 +200,10 @@ export default function GarageHistoryScreen() {
         </View>
       ) : (
         <FlatList
-          data={processedRequests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())}
+          data={processedRequests.sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )}
           renderItem={renderRequestItem}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}

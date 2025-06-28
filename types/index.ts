@@ -47,14 +47,14 @@ export interface ServiceRequest {
     longitude: number;
     address: string;
   };
-  vehicleInfo: {
-    make: string;
-    model: string;
-    year: string;
-    licensePlate: string;
-  };
-  urgency: 'low' | 'medium' | 'high';
-  createdAt: string;
+  // vehicleInfo: {
+  //   make: string;
+  //   model: string;
+  //   year: string;
+  //   licensePlate: string;
+  // };
+  // urgency: 'low' | 'medium' | 'high';
+  createdAt?: string;
   acceptedAt?: string;
   completedAt?: string;
   cancelledAt?: string;

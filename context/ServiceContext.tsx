@@ -7,8 +7,13 @@ import { API_URL } from '../config/api';
 
 interface ServiceContextType {
   requests: ServiceRequest[];
-  createRequest: (request: Omit<ServiceRequest, 'id' | 'createdAt' | 'status'>) => Promise<boolean>;
-  updateRequestStatus: (requestId: string, status: ServiceRequest['status']) => Promise<boolean>;
+  createRequest: (
+    request: Omit<ServiceRequest, 'id' | 'createdAt' | 'status'>
+  ) => Promise<boolean>;
+  updateRequestStatus: (
+    requestId: string,
+    status: ServiceRequest['status']
+  ) => Promise<boolean>;
   getRequestsForClient: () => Promise<ServiceRequest[]>;
   getRequestsForGarage: () => Promise<ServiceRequest[]>;
   refreshRequests: () => Promise<void>;
@@ -24,7 +29,9 @@ export const useService = () => {
   return context;
 };
 
-export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const { currentUser } = useAuth();
 
@@ -38,8 +45,8 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       const token = await AsyncStorage.getItem('authToken');
       return {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       };
     } catch (error) {
       console.error('Error getting auth token:', error);
@@ -52,10 +59,13 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     try {
       const headers = await getAuthHeader();
-      const endpoint = currentUser.role === 'client' ? 'service-requests/client' : 'service-requests/garage';
-      
+      const endpoint =
+        currentUser.role === 'client'
+          ? 'service-requests/client'
+          : 'service-requests/garage';
+
       const response = await fetch(`${API_URL}/${endpoint}`, {
-        headers
+        headers,
       });
 
       if (!response.ok) {
@@ -69,14 +79,16 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const createRequest = async (requestData: Omit<ServiceRequest, 'id' | 'createdAt' | 'status'>): Promise<boolean> => {
+  const createRequest = async (
+    requestData: Omit<ServiceRequest, 'id' | 'createdAt' | 'status'>
+  ): Promise<boolean> => {
     try {
       const headers = await getAuthHeader();
-      
+
       const response = await fetch(`${API_URL}/service-requests`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(requestData)
+        body: JSON.stringify(requestData),
       });
 
       const data = await response.json();
@@ -95,24 +107,31 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const updateRequestStatus = async (requestId: string, status: ServiceRequest['status']): Promise<boolean> => {
+  const updateRequestStatus = async (
+    requestId: string,
+    status: ServiceRequest['status']
+  ): Promise<boolean> => {
     try {
       const headers = await getAuthHeader();
-      
-      const endpoint = status === 'cancelled' 
-        ? `service-requests/${requestId}/cancel`
-        : `service-requests/${requestId}/status`;
-      
+
+      const endpoint =
+        status === 'cancelled'
+          ? `service-requests/${requestId}/cancel`
+          : `service-requests/${requestId}/status`;
+
       const response = await fetch(`${API_URL}/${endpoint}`, {
         method: 'PATCH',
         headers,
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        Alert.alert('Erreur', data.message || `Impossible de mettre à jour le statut en ${status}`);
+        Alert.alert(
+          'Erreur',
+          data.message || `Impossible de mettre à jour le statut en ${status}`
+        );
         return false;
       }
 
@@ -127,12 +146,12 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const getRequestsForClient = async (): Promise<ServiceRequest[]> => {
     if (!currentUser || currentUser.role !== 'client') return [];
-    
+
     try {
       const headers = await getAuthHeader();
-      
+
       const response = await fetch(`${API_URL}/service-requests/client`, {
-        headers
+        headers,
       });
 
       if (!response.ok) {
@@ -149,12 +168,12 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const getRequestsForGarage = async (): Promise<ServiceRequest[]> => {
     if (!currentUser || currentUser.role !== 'garage') return [];
-    
+
     try {
       const headers = await getAuthHeader();
-      
+
       const response = await fetch(`${API_URL}/service-requests/garage`, {
-        headers
+        headers,
       });
 
       if (!response.ok) {
@@ -170,14 +189,16 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   return (
-    <ServiceContext.Provider value={{
-      requests,
-      createRequest,
-      updateRequestStatus,
-      getRequestsForClient,
-      getRequestsForGarage,
-      refreshRequests,
-    }}>
+    <ServiceContext.Provider
+      value={{
+        requests,
+        createRequest,
+        updateRequestStatus,
+        getRequestsForClient,
+        getRequestsForGarage,
+        refreshRequests,
+      }}
+    >
       {children}
     </ServiceContext.Provider>
   );

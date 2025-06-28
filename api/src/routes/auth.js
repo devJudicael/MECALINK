@@ -43,7 +43,6 @@ const generateToken = (userId) => {
 
 // Route d'inscription
 router.post('/register', registerValidation, async (req, res) => {
-  console.log(req.body);
   // Vérifier les erreurs de validation
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -61,12 +60,7 @@ router.post('/register', registerValidation, async (req, res) => {
 
     // Validation supplémentaire pour les garages
     if (role === 'garage') {
-      if (
-        !location ||
-        !location.latitude ||
-        !location.longitude ||
-        !location.address
-      ) {
+      if (!location) {
         return res.status(400).json({
           message:
             'Les informations de localisation sont requises pour un garage',

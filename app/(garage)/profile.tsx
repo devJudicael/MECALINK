@@ -10,7 +10,16 @@ import {
   ScrollView,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
-import { User, Mail, Phone, LogOut, Wrench, MapPin, Clock, Navigation } from 'lucide-react-native';
+import {
+  User,
+  Mail,
+  Phone,
+  LogOut,
+  Wrench,
+  MapPin,
+  Clock,
+  Navigation,
+} from 'lucide-react-native';
 import { Garage, Location } from '@/types';
 import * as ExpoLocation from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -27,9 +36,12 @@ export default function GarageProfileScreen() {
   useEffect(() => {
     const loadGarageData = async () => {
       if (!currentUser) return;
-      
+
+      console.log('--- currentUser', JSON.stringify(currentUser, null, 2));
+
       try {
         setLoading(true);
+
         // Ici, nous utilisons les données de l'utilisateur actuel comme données de garage
         // Dans une implémentation complète, vous feriez un appel API pour obtenir les détails du garage
         setGarageData({
@@ -43,7 +55,7 @@ export default function GarageProfileScreen() {
           openingHours: currentUser.openingHours || 'Non spécifié',
           rating: currentUser.rating || 0,
           isOpen: true,
-          distance: 0
+          distance: 0,
         });
       } catch (err) {
         console.error('Erreur lors du chargement des données du garage:', err);
@@ -72,11 +84,11 @@ export default function GarageProfileScreen() {
 
   const updateGarageLocation = async () => {
     if (!currentUser || !garageData) return;
-    
+
     try {
       // Demander la permission d'accéder à la localisation
       const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
-      
+
       if (status !== 'granted') {
         Alert.alert(
           'Permission refusée',
@@ -84,72 +96,81 @@ export default function GarageProfileScreen() {
         );
         return;
       }
-      
+
       setUpdatingLocation(true);
-      
+
       // Obtenir la position actuelle
       const location = await ExpoLocation.getCurrentPositionAsync({
-        accuracy: ExpoLocation.Accuracy.High
+        accuracy: ExpoLocation.Accuracy.High,
       });
-      
+
       // Obtenir l'adresse à partir des coordonnées
       const reverseGeocode = await ExpoLocation.reverseGeocodeAsync({
         latitude: location.coords.latitude,
-        longitude: location.coords.longitude
+        longitude: location.coords.longitude,
       });
-      
+
       let address = 'Adresse non disponible';
-      
+
       if (reverseGeocode.length > 0) {
         const addressData = reverseGeocode[0];
-        address = `${addressData.street || ''} ${addressData.streetNumber || ''}, ${addressData.city || ''}, ${addressData.region || ''}, ${addressData.country || ''}`
+        address = `${addressData.street || ''} ${
+          addressData.streetNumber || ''
+        }, ${addressData.city || ''}, ${addressData.region || ''}, ${
+          addressData.country || ''
+        }`
           .replace(/,\s*,/g, ',')
           .replace(/^\s*,\s*|\s*,\s*$/g, '')
           .trim();
       }
-      
+
       // Récupérer le token d'authentification
       const token = await AsyncStorage.getItem('authToken');
       if (!token) {
-        Alert.alert('Erreur', 'Vous devez être connecté pour effectuer cette action');
+        Alert.alert(
+          'Erreur',
+          'Vous devez être connecté pour effectuer cette action'
+        );
         return;
       }
-      
+
       // Créer l'objet de localisation
       const newLocation: Location = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-        address: address
+        address: address,
       };
-      
+
       // Mettre à jour les données du garage avec la nouvelle position
       const updatedGarageData = {
         ...garageData,
         latitude: newLocation.latitude,
         longitude: newLocation.longitude,
-        address: newLocation.address
+        address: newLocation.address,
       };
-      
+
       // Mettre à jour les données du garage dans l'API
       const response = await fetch(`${API_URL}/garages/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          location: newLocation
-        })
+          location: newLocation,
+        }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Erreur lors de la mise à jour de la position');
+        throw new Error(
+          errorData.message || 'Erreur lors de la mise à jour de la position'
+        );
       }
-      
+
       // Mettre à jour les données locales
       setGarageData(updatedGarageData);
-      
+
       // Mettre à jour les données de l'utilisateur dans AsyncStorage
       const userData = await AsyncStorage.getItem('currentUser');
       if (userData) {
@@ -157,11 +178,17 @@ export default function GarageProfileScreen() {
         user.location = newLocation;
         await AsyncStorage.setItem('currentUser', JSON.stringify(user));
       }
-      
-      Alert.alert('Succès', 'La position de votre garage a été mise à jour avec succès');
+
+      Alert.alert(
+        'Succès',
+        'La position de votre garage a été mise à jour avec succès'
+      );
     } catch (error) {
       console.error('Erreur lors de la mise à jour de la position:', error);
-      Alert.alert('Erreur', 'Impossible de mettre à jour la position du garage');
+      Alert.alert(
+        'Erreur',
+        'Impossible de mettre à jour la position du garage'
+      );
     } finally {
       setUpdatingLocation(false);
     }
@@ -183,7 +210,7 @@ export default function GarageProfileScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.retryButton}
             onPress={() => setLoading(true)} // Cela déclenchera un nouveau chargement via useEffect
           >
@@ -211,7 +238,9 @@ export default function GarageProfileScreen() {
 
         <View style={styles.content}>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Informations professionnelles</Text>
+            <Text style={styles.sectionTitle}>
+              Informations professionnelles
+            </Text>
 
             <View style={styles.infoCard}>
               <View style={styles.infoItem}>
@@ -242,59 +271,65 @@ export default function GarageProfileScreen() {
                 </View>
               </View>
 
+              {!garageData?.location?.latitude && (
+                <>
+                  <View style={styles.separator} />
+                  <View style={styles.infoItem}>
+                    <MapPin size={20} color="#64748b" />
+                    <View style={styles.infoContent}>
+                      <Text style={styles.infoLabel}>Adresse</Text>
+                      <Text style={styles.infoValue}>{garageData.address}</Text>
+                    </View>
+                  </View>
+                </>
+              )}
+
+              {garageData?.address && (
+                <>
+                  <View style={styles.separator} />
+                  <View style={styles.infoItem}>
+                    <MapPin size={20} color="#64748b" />
+                    <View style={styles.infoContent}>
+                      <Text style={styles.infoLabel}>Adresse</Text>
+                      <Text style={styles.infoValue}>
+                        {garageData?.location.address}
+                      </Text>
+                    </View>
+                  </View>
+                </>
+              )}
+
               <View style={styles.separator} />
 
-              <View style={styles.infoItem}>
-                <MapPin size={20} color="#64748b" />
-                <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Adresse</Text>
-                  <Text style={styles.infoValue}>{garageData.address}</Text>
-                </View>
-              </View>
-              
-              <View style={styles.separator} />
-              
-              <TouchableOpacity 
-                style={styles.locationButton} 
-                onPress={updateGarageLocation}
-                disabled={updatingLocation}
-              >
-                <Navigation size={20} color="#fff" />
-                <Text style={styles.locationButtonText}>
-                  {updatingLocation ? 'Mise à jour...' : 'Utiliser ma position actuelle'}
-                </Text>
-                {updatingLocation && (
-                  <ActivityIndicator size="small" color="#fff" style={styles.locationLoader} />
-                )}
-              </TouchableOpacity>
-              
-              <View style={styles.separator} />
-
-              <View style={styles.infoItem}>
-                <Clock size={20} color="#64748b" />
-                <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Horaires d'ouverture</Text>
-                  <Text style={styles.infoValue}>{garageData.openingHours}</Text>
-                </View>
-              </View>
+              {!garageData?.location?.latitude && (
+                <TouchableOpacity
+                  style={styles.locationButton}
+                  onPress={updateGarageLocation}
+                  disabled={updatingLocation}
+                >
+                  <Navigation size={20} color="#fff" />
+                  <Text style={styles.locationButtonText}>
+                    {updatingLocation
+                      ? 'Mise à jour...'
+                      : 'Utiliser ma position actuelle'}
+                  </Text>
+                  {updatingLocation && (
+                    <ActivityIndicator
+                      size="small"
+                      color="#fff"
+                      style={styles.locationLoader}
+                    />
+                  )}
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
-          {garageData.services && garageData.services.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Services proposés</Text>
-              <View style={styles.servicesContainer}>
-                {garageData.services.map((service, index) => (
-                  <View key={index} style={styles.serviceTag}>
-                    <Text style={styles.serviceText}>{service}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
-
           <View style={styles.section}>
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={handleLogout}
+            >
               <LogOut size={20} color="#dc2626" />
               <Text style={styles.logoutText}>Se déconnecter</Text>
             </TouchableOpacity>

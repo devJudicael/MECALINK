@@ -25,30 +25,35 @@ import {
 
 export default function GarageRequestsScreen() {
   const { currentUser } = useAuth();
-  const { getRequestsForGarage, updateRequestStatus, refreshRequests } = useService();
-  
+  const { getRequestsForGarage, updateRequestStatus, refreshRequests } =
+    useService();
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [pendingRequests, setPendingRequests] = useState<ServiceRequest[]>([]);
-  
+
   // Charger les demandes au chargement de l'écran
   useEffect(() => {
     loadRequests();
   }, [currentUser]);
-  
+
   // Filtrer les demandes en attente lorsque les demandes changent
   useEffect(() => {
-    setPendingRequests(requests.filter(request => request.status === 'pending'));
+    setPendingRequests(
+      requests.filter((request) => request.status === 'pending')
+    );
   }, [requests]);
-  
+
   // Fonction pour charger les demandes
   const loadRequests = async () => {
     if (!currentUser) return;
-    
+
     try {
       setLoading(true);
       const fetchedRequests = await getRequestsForGarage();
+      // console.log('fetchedRequests', JSON.stringify(fetchedRequests, null, 2));
+
       setRequests(fetchedRequests);
     } catch (error) {
       console.error('Error loading requests:', error);
@@ -57,7 +62,7 @@ export default function GarageRequestsScreen() {
       setLoading(false);
     }
   };
-  
+
   // Fonction pour rafraîchir les demandes
   const handleRefresh = async () => {
     try {
@@ -89,7 +94,7 @@ export default function GarageRequestsScreen() {
               await loadRequests();
             } catch (error) {
               console.error('Error accepting request:', error);
-              Alert.alert('Erreur', 'Impossible d\'accepter la demande');
+              Alert.alert('Erreur', "Impossible d'accepter la demande");
             }
           },
         },
@@ -137,35 +142,29 @@ export default function GarageRequestsScreen() {
   const renderRequestItem = ({ item: request }: { item: ServiceRequest }) => (
     <View style={styles.requestCard}>
       <View style={styles.requestHeader}>
-        <Text style={styles.clientName}>{request.clientName}</Text>
-        <Text style={styles.dateText}>{formatDate(request.createdAt)}</Text>
+        <Text style={styles.clientName}>{request?.clientName}</Text>
+        <Text style={styles.dateText}>{formatDate(request?.createdAt)}</Text>
       </View>
 
-      <Text style={styles.description}>{request.description}</Text>
+      <Text style={styles.description}>
+        {' '}
+        Probleme : {request?.description ?? 'panne'}
+      </Text>
 
       <View style={styles.locationContainer}>
         <MapPin size={16} color="#64748b" />
-        <Text style={styles.locationText}>{request.location.address}</Text>
+        <Text style={styles.locationText}>{request?.location.address}</Text>
       </View>
 
       <View style={styles.contactContainer}>
         <View style={styles.contactItem}>
           <Phone size={16} color="#64748b" />
-          <Text style={styles.contactText}>{request.clientPhone}</Text>
+          <Text style={styles.contactText}>{request?.clientPhone}</Text>
         </View>
         <View style={styles.contactItem}>
           <Mail size={16} color="#64748b" />
-          <Text style={styles.contactText}>{request.clientEmail}</Text>
+          <Text style={styles.contactText}>{request?.clientEmail}</Text>
         </View>
-      </View>
-
-      <View style={styles.vehicleContainer}>
-        <Car size={16} color="#64748b" />
-        <Text style={styles.vehicleText}>
-          {request.vehicleInfo.make} {request.vehicleInfo.model} (
-          {request.vehicleInfo.year})
-        </Text>
-        <Text style={styles.plateText}>{request.vehicleInfo.licensePlate}</Text>
       </View>
 
       <View style={styles.actionContainer}>
@@ -178,7 +177,7 @@ export default function GarageRequestsScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.acceptButton}
-          onPress={() => handleAcceptRequest(request.id)}
+          onPress={() => handleAcceptRequest(request._id)}
         >
           <CheckCircle size={20} color="#fff" />
           <Text style={styles.acceptButtonText}>Accepter</Text>
@@ -205,14 +204,18 @@ export default function GarageRequestsScreen() {
         <Text style={styles.title}>Demandes reçues</Text>
         <View style={styles.headerActions}>
           <Text style={styles.subtitle}>
-            {pendingRequests.length} demandes en attente
+            {pendingRequests.length} demande(s) en attente
           </Text>
-          <TouchableOpacity 
-            style={styles.refreshButton} 
+          <TouchableOpacity
+            style={styles.refreshButton}
             onPress={handleRefresh}
             disabled={refreshing}
           >
-            <RefreshCw size={20} color="#059669" style={refreshing ? styles.rotating : undefined} />
+            <RefreshCw
+              size={20}
+              color="#059669"
+              style={refreshing ? styles.rotating : undefined}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -232,7 +235,7 @@ export default function GarageRequestsScreen() {
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           )}
           renderItem={renderRequestItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
           refreshing={refreshing}
@@ -371,7 +374,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
-    color: '#374151',
+    color: '#dc2453',
     marginBottom: 16,
     lineHeight: 22,
   },

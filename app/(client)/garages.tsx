@@ -23,7 +23,12 @@ export default function GaragesListScreen() {
   const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
-  const { nearbyGarages, isLoading: isLoadingGarages, error, fetchNearbyGarages } = useGarageStore();
+  const {
+    nearbyGarages,
+    isLoading: isLoadingGarages,
+    error,
+    fetchNearbyGarages,
+  } = useGarageStore();
 
   // Récupérer la position de l'utilisateur et les garages à proximité
   useEffect(() => {
@@ -86,68 +91,60 @@ export default function GaragesListScreen() {
   };
 
   const handleGaragePress = (garage: Garage) => {
+    // console.log('garage push', JSON.stringify(garage, null, 2));
+    // console.log('garage id', garage._id);
     router.push({
       pathname: '/garage-details',
-      params: { garageId: garage.id },
+      params: { garageId: garage._id },
     });
   };
 
-  const renderGarageItem = ({ item: garage }: { item: Garage }) => (
-    <TouchableOpacity
-      style={styles.garageCard}
-      onPress={() => handleGaragePress(garage)}
-    >
-      <View style={styles.garageHeader}>
-        <View style={styles.garageInfo}>
-          <Text style={styles.garageName}>{garage.name}</Text>
-          {/* <View style={styles.ratingContainer}>
-            <Star size={16} color="#FCD34D" fill="#FCD34D" />
-            <Text style={styles.rating}>{garage.rating}</Text>
-            <View
-              style={[
-                styles.statusBadge,
-                garage.isOpen ? styles.openBadge : styles.closedBadge,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.statusText,
-                  garage.isOpen ? styles.openText : styles.closedText,
-                ]}
-              >
-                {garage.isOpen ? 'Ouvert' : 'Fermé'}
-              </Text>
-            </View>
-          </View> */}
-        </View>
-        <ChevronRight size={20} color="#64748b" />
-      </View>
+  const renderGarageItem = ({ item: garage }: { item: Garage }) => {
+    // console.log('garage', JSON.stringify(garage, null, 2));
 
-      <View style={styles.addressContainer}>
-        <MapPin size={16} color="#64748b" />
-        <Text style={styles.address}>{garage.address}</Text>
-        {garage.distance && (
-          <Text style={styles.distance}>• {garage.distance.toFixed(1)} km</Text>
-        )}
-      </View>
-
-      <View style={styles.hoursContainer}>
-        <Clock size={16} color="#64748b" />
-        <Text style={styles.hours}>{garage.openingHours}</Text>
-      </View>
-
-      <View style={styles.servicesContainer}>
-        {garage.services.slice(0, 3).map((service, index) => (
-          <View key={index} style={styles.serviceTag}>
-            <Text style={styles.serviceText}>{service}</Text>
+    return (
+      <TouchableOpacity
+        style={styles.garageCard}
+        onPress={() => handleGaragePress(garage)}
+        key={garage._id}
+      >
+        <View style={styles.garageHeader}>
+          <View style={styles.garageInfo}>
+            <Text style={styles.garageName}>{garage.name}</Text>
           </View>
-        ))}
-        {garage.services.length > 3 && (
-          <Text style={styles.moreServices}>+{garage.services.length - 3}</Text>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
+          <ChevronRight size={20} color="#64748b" />
+        </View>
+
+        <View style={styles.addressContainer}>
+          <MapPin size={16} color="#64748b" />
+          <Text style={styles.address}>{garage.address}</Text>
+          {garage.distance && (
+            <Text style={styles.distance}>
+              • {garage.distance.toFixed(1)} km
+            </Text>
+          )}
+        </View>
+
+        <View style={styles.hoursContainer}>
+          <Clock size={16} color="#64748b" />
+          <Text style={styles.hours}>{garage.openingHours}</Text>
+        </View>
+
+        <View style={styles.servicesContainer}>
+          {garage.services.slice(0, 3).map((service, index) => (
+            <View key={index} style={styles.serviceTag}>
+              <Text style={styles.serviceText}>{service}</Text>
+            </View>
+          ))}
+          {garage.services.length > 3 && (
+            <Text style={styles.moreServices}>
+              +{garage.services.length - 3}
+            </Text>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   // Afficher un indicateur de chargement
   if (isLoading || isLoadingGarages) {
@@ -165,7 +162,7 @@ export default function GaragesListScreen() {
   if (error) {
     Alert.alert(
       'Erreur de connexion',
-      'Des données fictives sont affichées car nous n\'avons pas pu nous connecter au serveur.'
+      "Des données fictives sont affichées car nous n'avons pas pu nous connecter au serveur."
     );
   }
 
@@ -192,6 +189,7 @@ export default function GaragesListScreen() {
 
       {filteredGarages.length > 0 ? (
         <FlatList
+          key={filteredGarages.length}
           data={filteredGarages}
           renderItem={renderGarageItem}
           keyExtractor={(item) => item.id}
@@ -201,7 +199,9 @@ export default function GaragesListScreen() {
       ) : (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>Aucun garage trouvé</Text>
-          <Text style={styles.emptySubtext}>Essayez de modifier votre recherche</Text>
+          <Text style={styles.emptySubtext}>
+            Essayez de modifier votre recherche
+          </Text>
         </View>
       )}
     </SafeAreaView>
