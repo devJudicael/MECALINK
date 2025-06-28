@@ -82,11 +82,10 @@ export default function ClientMapScreen() {
   }, []); // Exécute une seule fois
 
   const handleMarkerPress = (garage: Garage) => {
-    console.log('marker press', JSON.stringify(garage, null, 2));
     // return;
     router.push({
       pathname: '/garage-details',
-      params: { garageId: garage.id },
+      params: { garageId: garage._id },
     });
   };
 

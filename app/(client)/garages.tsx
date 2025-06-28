@@ -100,13 +100,11 @@ export default function GaragesListScreen() {
   };
 
   const renderGarageItem = ({ item: garage }: { item: Garage }) => {
-    // console.log('garage', JSON.stringify(garage, null, 2));
-
     return (
       <TouchableOpacity
         style={styles.garageCard}
         onPress={() => handleGaragePress(garage)}
-        key={garage._id}
+        key={`${garage._id}`}
       >
         <View style={styles.garageHeader}>
           <View style={styles.garageInfo}>
@@ -171,7 +169,7 @@ export default function GaragesListScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Liste des garages</Text>
         <Text style={styles.subtitle}>
-          {filteredGarages.length} garages trouvés
+          {filteredGarages.length} garage(s) trouvé(s)
         </Text>
       </View>
 

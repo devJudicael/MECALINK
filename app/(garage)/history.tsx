@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Linking,
+  Platform,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useService } from '../../context/ServiceContext';
@@ -19,6 +21,7 @@ import {
   CircleCheck as CheckCircle,
   Circle as XCircle,
   RefreshCw,
+  Navigation,
 } from 'lucide-react-native';
 
 export default function GarageHistoryScreen() {
@@ -120,6 +123,29 @@ export default function GarageHistoryScreen() {
       minute: '2-digit',
     });
   };
+  
+  // Fonction pour ouvrir l'application Maps avec les coordonnées
+  const openMapsWithLocation = (latitude: number, longitude: number) => {
+    const scheme = Platform.select({ ios: 'maps:', android: 'geo:' });
+    const latLng = `${latitude},${longitude}`;
+    const url = Platform.select({
+      ios: `${scheme}?q=${latLng}&ll=${latLng}`,
+      android: `${scheme}0,0?q=${latLng}`,
+    });
+    
+    Linking.canOpenURL(url!).then(supported => {
+      if (supported) {
+        Linking.openURL(url!);
+      } else {
+        // Fallback pour le web ou si l'application Maps n'est pas disponible
+        const browserUrl = `https://www.google.com/maps/search/?api=1&query=${latLng}`;
+        Linking.openURL(browserUrl);
+      }
+    }).catch(err => {
+      console.error('Erreur lors de l\'ouverture de Maps:', err);
+      Alert.alert('Erreur', 'Impossible d\'ouvrir l\'application Maps');
+    });
+  };
 
   const renderRequestItem = ({ item: request }: { item: ServiceRequest }) => (
     <View style={styles.requestCard}>
@@ -147,12 +173,22 @@ export default function GarageHistoryScreen() {
 
       <Text style={styles.description}>{request.description}</Text>
 
-      <View style={styles.contactContainer}>
-        <View style={styles.contactItem}>
-          <Phone size={16} color="#64748b" />
-          <Text style={styles.contactText}>{request.clientPhone}</Text>
+      {request.status === 'accepted' && (
+        <View style={styles.contactContainer}>
+          <View style={styles.contactItem}>
+            <Phone size={16} color="#64748b" />
+            <Text style={styles.contactText}>{request.clientPhone}</Text>
+          </View>
+          
+          <TouchableOpacity 
+            style={styles.locationButton}
+            onPress={() => openMapsWithLocation(request.location.latitude, request.location.longitude)}
+          >
+            <Navigation size={16} color="#ffffff" />
+            <Text style={styles.locationButtonText}>Voir sur Maps</Text>
+          </TouchableOpacity>
         </View>
-      </View>
+      )}
     </View>
   );
 
@@ -340,6 +376,7 @@ const styles = StyleSheet.create({
   },
   contactContainer: {
     marginBottom: 12,
+    gap: 12,
   },
   contactItem: {
     flexDirection: 'row',
@@ -349,6 +386,22 @@ const styles = StyleSheet.create({
   contactText: {
     fontSize: 14,
     color: '#64748b',
+  },
+  locationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#059669',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+    marginTop: 8,
+  },
+  locationButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   vehicleInfo: {
     flexDirection: 'row',

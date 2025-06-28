@@ -115,8 +115,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         email: data.user.email,
         phone: data.user.phone,
         role: data.user.role,
-        location: data.user.location,
+        location: data.garage.location,
+        address: data.garage.address,
       };
+
+      console.log('--- user front --- : ', JSON.stringify(user, null, 2));
 
       setCurrentUser(user);
       await AsyncStorage.setItem('currentUser', JSON.stringify(user));
@@ -153,6 +156,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       const data = await response.json();
+
+      // console.log(
+      //   '-- response signup client -- ',
+      //   JSON.stringify(data, null, 2)
+      // );
 
       if (!response.ok) {
         Alert.alert(

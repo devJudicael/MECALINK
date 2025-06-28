@@ -156,7 +156,7 @@ export default function GarageRequestsScreen() {
         <Text style={styles.locationText}>{request?.location.address}</Text>
       </View>
 
-      <View style={styles.contactContainer}>
+      {/* <View style={styles.contactContainer}>
         <View style={styles.contactItem}>
           <Phone size={16} color="#64748b" />
           <Text style={styles.contactText}>{request?.clientPhone}</Text>
@@ -165,12 +165,12 @@ export default function GarageRequestsScreen() {
           <Mail size={16} color="#64748b" />
           <Text style={styles.contactText}>{request?.clientEmail}</Text>
         </View>
-      </View>
+      </View> */}
 
       <View style={styles.actionContainer}>
         <TouchableOpacity
           style={styles.rejectButton}
-          onPress={() => handleRejectRequest(request.id)}
+          onPress={() => handleRejectRequest(request._id)}
         >
           <XCircle size={20} color="#dc2626" />
           <Text style={styles.rejectButtonText}>Refuser</Text>

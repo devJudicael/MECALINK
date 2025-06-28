@@ -37,7 +37,7 @@ export default function GarageProfileScreen() {
     const loadGarageData = async () => {
       if (!currentUser) return;
 
-      console.log('--- currentUser', JSON.stringify(currentUser, null, 2));
+      console.log('--- currentUser ---', JSON.stringify(currentUser, null, 2));
 
       try {
         setLoading(true);
@@ -56,6 +56,7 @@ export default function GarageProfileScreen() {
           rating: currentUser.rating || 0,
           isOpen: true,
           distance: 0,
+          role: currentUser.role,
         });
       } catch (err) {
         console.error('Erreur lors du chargement des données du garage:', err);
@@ -271,57 +272,61 @@ export default function GarageProfileScreen() {
                 </View>
               </View>
 
-              {!garageData?.location?.latitude && (
-                <>
-                  <View style={styles.separator} />
-                  <View style={styles.infoItem}>
-                    <MapPin size={20} color="#64748b" />
-                    <View style={styles.infoContent}>
-                      <Text style={styles.infoLabel}>Adresse</Text>
-                      <Text style={styles.infoValue}>{garageData.address}</Text>
+              {garageData?.role === 'garage' &&
+                garageData?.location?.latitude === 0 && (
+                  <>
+                    <View style={styles.separator} />
+                    <View style={styles.infoItem}>
+                      <MapPin size={20} color="#64748b" />
+                      <View style={styles.infoContent}>
+                        <Text style={styles.infoLabel}>Adresse</Text>
+                        <Text style={styles.infoValue}>Non spécifié</Text>
+                      </View>
                     </View>
-                  </View>
-                </>
-              )}
+                  </>
+                )}
 
-              {garageData?.address && (
-                <>
-                  <View style={styles.separator} />
-                  <View style={styles.infoItem}>
-                    <MapPin size={20} color="#64748b" />
-                    <View style={styles.infoContent}>
-                      <Text style={styles.infoLabel}>Adresse</Text>
-                      <Text style={styles.infoValue}>
-                        {garageData?.location.address}
-                      </Text>
+              {garageData?.role === 'garage' &&
+                garageData?.location?.latitude !== 0 &&
+                garageData?.address && (
+                  <>
+                    <View style={styles.separator} />
+                    <View style={styles.infoItem}>
+                      <MapPin size={20} color="#64748b" />
+                      <View style={styles.infoContent}>
+                        <Text style={styles.infoLabel}>Adresse</Text>
+                        <Text style={styles.infoValue}>
+                          {garageData?.address}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                </>
-              )}
+                  </>
+                )}
 
               <View style={styles.separator} />
 
-              {!garageData?.location?.latitude && (
-                <TouchableOpacity
-                  style={styles.locationButton}
-                  onPress={updateGarageLocation}
-                  disabled={updatingLocation}
-                >
-                  <Navigation size={20} color="#fff" />
-                  <Text style={styles.locationButtonText}>
-                    {updatingLocation
-                      ? 'Mise à jour...'
-                      : 'Utiliser ma position actuelle'}
-                  </Text>
-                  {updatingLocation && (
-                    <ActivityIndicator
-                      size="small"
-                      color="#fff"
-                      style={styles.locationLoader}
-                    />
-                  )}
-                </TouchableOpacity>
-              )}
+              {garageData?.role === 'garage' &&
+                garageData?.location?.latitude === 0 && (
+                  <TouchableOpacity
+                    style={styles.locationButton}
+                    onPress={updateGarageLocation}
+                    disabled={updatingLocation}
+                  >
+                    <Navigation size={20} color="#fff" />
+                    <Text style={styles.locationButtonText}>
+                      {updatingLocation
+                        ? 'Mise à jour...'
+                        : 'Utiliser ma position actuelle'}
+                    </Text>
+                    {updatingLocation && (
+                      <ActivityIndicator
+                        size="small"
+                        color="#fff"
+                        style={styles.locationLoader}
+                      />
+                    )}
+                  </TouchableOpacity>
+                )}
             </View>
           </View>
 
