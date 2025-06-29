@@ -201,6 +201,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   ): Promise<boolean> => {
     try {
       // Afficher les données pour le débogage
+      console.log(
+        '-- userData garage to api -- : ',
+        JSON.stringify(userData, null, 2)
+      );
 
       const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
@@ -211,6 +215,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       const data = await response.json();
+
+      console.log(
+        '-- response signup garage from api -- : ',
+        JSON.stringify(data, null, 2)
+      );
 
       if (!response.ok) {
         Alert.alert(
@@ -235,7 +244,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await AsyncStorage.setItem('authToken', data.token);
       return true;
     } catch (error) {
-      console.error('Garage registration error:', error);
+      console.error('Garage registration error from api:', error);
       Alert.alert(
         "Erreur d'inscription",
         'Impossible de se connecter au serveur'

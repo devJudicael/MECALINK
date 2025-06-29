@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#5EABD6',
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 48,
