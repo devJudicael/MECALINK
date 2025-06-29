@@ -42,7 +42,12 @@
       }
     },
     "android": {
-      "package": "com.devjudicael.MECALINK"
+      "package": "com.devjudicael.MECALINK",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAOVYRIgupAurZup5y1PRh8Ismb1A3lLao"
+        }
+      }
     }
   }
 }
