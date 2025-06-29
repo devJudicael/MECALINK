@@ -142,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const register = async (userData: Omit<User, 'id'>): Promise<boolean> => {
-    console.log('userData front : ', userData);
+    // console.log('userData front : ', userData);
     try {
       const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
@@ -201,10 +201,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   ): Promise<boolean> => {
     try {
       // Afficher les données pour le débogage
-      console.log(
-        '-- userData garage to api -- : ',
-        JSON.stringify(userData, null, 2)
-      );
+      // console.log(
+      //   '-- userData garage to api -- : ',
+      //   JSON.stringify(userData, null, 2)
+      // );
 
       const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
@@ -216,10 +216,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const data = await response.json();
 
-      console.log(
-        '-- response signup garage from api -- : ',
-        JSON.stringify(data, null, 2)
-      );
+      // console.log(
+      //   '-- response signup garage from api -- : ',
+      //   JSON.stringify(data, null, 2)
+      // );
 
       if (!response.ok) {
         Alert.alert(

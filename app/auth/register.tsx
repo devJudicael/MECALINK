@@ -72,7 +72,7 @@ export default function RegisterScreen() {
       //   Alert.alert('Erreur', "Erreur lors de l'inscription");
       // }
     } catch (error) {
-      console.log('-- error register -- ', error);
+      // console.log('-- error register -- ', error);
       Alert.alert('Erreur', 'Une erreur est survenue : ' + error);
     } finally {
       setIsLoading(false);

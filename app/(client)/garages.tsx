@@ -104,7 +104,6 @@ export default function GaragesListScreen() {
       <TouchableOpacity
         style={styles.garageCard}
         onPress={() => handleGaragePress(garage)}
-        key={`${garage._id}`}
       >
         <View style={styles.garageHeader}>
           <View style={styles.garageInfo}>
@@ -190,7 +189,7 @@ export default function GaragesListScreen() {
           key={filteredGarages.length}
           data={filteredGarages}
           renderItem={renderGarageItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
         />
@@ -277,6 +276,7 @@ const styles = StyleSheet.create({
   listContainer: {
     padding: 20,
     gap: 16,
+    paddingBottom: 20,
   },
   garageCard: {
     backgroundColor: '#fff',

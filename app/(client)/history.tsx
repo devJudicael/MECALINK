@@ -88,7 +88,7 @@ export default function HistoryScreen() {
   };
 
   const renderRequestItem = ({ item: request }: { item: ServiceRequest }) => (
-    <View style={styles.requestCard} key={request._id}>
+    <View style={styles.requestCard}>
       <View style={styles.requestHeader}>
         <View style={styles.statusContainer}>
           {getStatusIcon(request.status)}
@@ -101,7 +101,9 @@ export default function HistoryScreen() {
             {getStatusText(request.status)}
           </Text>
         </View>
-        <Text style={styles.dateText}>{formatDate(request.createdAt)}</Text>
+        <Text style={styles.dateText}>
+          {request.createdAt ? formatDate(request.createdAt) : 'Date inconnue'}
+        </Text>
       </View>
 
       <Text style={styles.garageName}>{request.garageName}</Text>
@@ -140,7 +142,7 @@ export default function HistoryScreen() {
                 new Date(a.createdAt).getTime()
             )}
           renderItem={renderRequestItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
         />

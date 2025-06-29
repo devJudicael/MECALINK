@@ -123,7 +123,7 @@ export default function GarageHistoryScreen() {
       minute: '2-digit',
     });
   };
-  
+
   // Fonction pour ouvrir l'application Maps avec les coordonnées
   const openMapsWithLocation = (latitude: number, longitude: number) => {
     const scheme = Platform.select({ ios: 'maps:', android: 'geo:' });
@@ -132,19 +132,21 @@ export default function GarageHistoryScreen() {
       ios: `${scheme}?q=${latLng}&ll=${latLng}`,
       android: `${scheme}0,0?q=${latLng}`,
     });
-    
-    Linking.canOpenURL(url!).then(supported => {
-      if (supported) {
-        Linking.openURL(url!);
-      } else {
-        // Fallback pour le web ou si l'application Maps n'est pas disponible
-        const browserUrl = `https://www.google.com/maps/search/?api=1&query=${latLng}`;
-        Linking.openURL(browserUrl);
-      }
-    }).catch(err => {
-      console.error('Erreur lors de l\'ouverture de Maps:', err);
-      Alert.alert('Erreur', 'Impossible d\'ouvrir l\'application Maps');
-    });
+
+    Linking.canOpenURL(url!)
+      .then((supported) => {
+        if (supported) {
+          Linking.openURL(url!);
+        } else {
+          // Fallback pour le web ou si l'application Maps n'est pas disponible
+          const browserUrl = `https://www.google.com/maps/search/?api=1&query=${latLng}`;
+          Linking.openURL(browserUrl);
+        }
+      })
+      .catch((err) => {
+        console.error("Erreur lors de l'ouverture de Maps:", err);
+        Alert.alert('Erreur', "Impossible d'ouvrir l'application Maps");
+      });
   };
 
   const renderRequestItem = ({ item: request }: { item: ServiceRequest }) => (
@@ -161,7 +163,9 @@ export default function GarageHistoryScreen() {
             {getStatusText(request.status)}
           </Text>
         </View>
-        <Text style={styles.dateText}>{formatDate(request.createdAt)}</Text>
+        <Text style={styles.dateText}>
+          {formatDate(request.createdAt) ?? 'Date inconnue'}
+        </Text>
       </View>
 
       <Text style={styles.clientName}>{request.clientName}</Text>
@@ -179,10 +183,15 @@ export default function GarageHistoryScreen() {
             <Phone size={16} color="#64748b" />
             <Text style={styles.contactText}>{request.clientPhone}</Text>
           </View>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.locationButton}
-            onPress={() => openMapsWithLocation(request.location.latitude, request.location.longitude)}
+            onPress={() =>
+              openMapsWithLocation(
+                request.location.latitude,
+                request.location.longitude
+              )
+            }
           >
             <Navigation size={16} color="#ffffff" />
             <Text style={styles.locationButtonText}>Voir sur Maps</Text>
@@ -241,7 +250,7 @@ export default function GarageHistoryScreen() {
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           )}
           renderItem={renderRequestItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
           refreshing={refreshing}
