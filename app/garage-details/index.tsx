@@ -26,7 +26,10 @@ import {
   Mail,
   Car,
   TriangleAlert as AlertTriangle,
+  MessageSquare,
 } from 'lucide-react-native';
+import CommentsModal from './comments';
+import { useCommentStore } from '@/stores/comments';
 
 export default function GarageDetailsScreen() {
   const { garageId } = useLocalSearchParams();
@@ -37,6 +40,15 @@ export default function GarageDetailsScreen() {
 
   const [loading, setLoading] = useState(true);
   const [garage, setGarage] = useState(null);
+  const [commentsModalVisible, setCommentsModalVisible] = useState(false);
+
+  //
+  const { comments } = useCommentStore();
+  const calculateAverageRating = () => {
+    if (comments.length === 0) return 0;
+    const sum = comments.reduce((acc, comment) => acc + comment.rating, 0);
+    return (sum / comments.length).toFixed(1);
+  };
 
   useEffect(() => {
     // console.log('-- garage id2 -- ', garageId);
@@ -209,6 +221,17 @@ export default function GarageDetailsScreen() {
           <View style={styles.garageCard}>
             <View style={styles.garageHeader}>
               <Text style={styles.garageName}>{garage.name}</Text>
+              <View style={styles.ratingContainer}>
+                <Star size={20} color="#f59e0b" fill="#f59e0b" />
+                <Text style={styles.rating}>{calculateAverageRating()}</Text>
+                <TouchableOpacity
+                  style={styles.commentsButton}
+                  onPress={() => setCommentsModalVisible(true)}
+                >
+                  <MessageSquare size={16} color="#2563EB" />
+                  <Text style={styles.commentsButtonText}>Voir les avis</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View style={styles.infoContainer}>
@@ -275,6 +298,12 @@ export default function GarageDetailsScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
+
+        <CommentsModal
+          visible={commentsModalVisible}
+          onClose={() => setCommentsModalVisible(false)}
+          garageId={garageId as string}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -371,11 +400,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    marginTop: 8,
   },
   rating: {
     fontSize: 18,
     fontWeight: '600',
     color: '#1e293b',
+  },
+  commentsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 12,
+    backgroundColor: '#eff6ff',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+  },
+  commentsButtonText: {
+    fontSize: 14,
+    color: '#2563EB',
+    fontWeight: '500',
   },
   statusBadge: {
     paddingHorizontal: 12,

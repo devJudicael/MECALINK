@@ -13,3 +13,14 @@ export type Garage = {
   description: string;
   distance?: number;
 };
+
+export type Comment = {
+  _id: string;
+  garageId: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  updatedAt: string;
+};
