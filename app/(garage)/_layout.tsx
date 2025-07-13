@@ -27,9 +27,7 @@ export default function GarageLayout() {
         name="index"
         options={{
           title: 'Demandes',
-          tabBarIcon: ({ size, color }) => (
-            <Inbox size={size} color={color} />
-          ),
+          tabBarIcon: ({ size, color }) => <Inbox size={size} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -54,9 +52,7 @@ export default function GarageLayout() {
         name="profile"
         options={{
           title: 'Profil',
-          tabBarIcon: ({ size, color }) => (
-            <User size={size} color={color} />
-          ),
+          tabBarIcon: ({ size, color }) => <User size={size} color={color} />,
         }}
       />
     </Tabs>

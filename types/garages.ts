@@ -12,6 +12,7 @@ export type Garage = {
   openingHours: string;
   description: string;
   distance?: number;
+  skills?: string[];
 };
 
 export type Comment = {

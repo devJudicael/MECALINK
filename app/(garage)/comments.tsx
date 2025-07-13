@@ -65,10 +65,13 @@ export default function GarageCommentsScreen() {
 
   const renderCommentItem = ({ item }: { item: Comment }) => {
     const date = new Date(item.createdAt);
-    const formattedDate = `${date.toLocaleDateString()} à ${date.toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-    })}`;
+    const formattedDate = `${date.toLocaleDateString()} à ${date.toLocaleTimeString(
+      undefined,
+      {
+        hour: '2-digit',
+        minute: '2-digit',
+      }
+    )}`;
 
     return (
       <View style={styles.commentItem}>
@@ -93,7 +96,8 @@ export default function GarageCommentsScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>
-            Vous devez être connecté en tant que garage pour accéder à cette page.
+            Vous devez être connecté en tant que garage pour accéder à cette
+            page.
           </Text>
         </View>
       </SafeAreaView>
@@ -119,7 +123,9 @@ export default function GarageCommentsScreen() {
         {isLoading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#059669" />
-            <Text style={styles.loadingText}>Chargement des commentaires...</Text>
+            <Text style={styles.loadingText}>
+              Chargement des commentaires...
+            </Text>
           </View>
         ) : error ? (
           <View style={styles.errorContainer}>

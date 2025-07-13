@@ -19,7 +19,9 @@ import {
   MapPin,
   Clock,
   Navigation,
+  Award,
 } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { Garage, Location } from '@/types';
 import * as ExpoLocation from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -27,47 +29,83 @@ import { API_URL } from '../../config/api';
 
 export default function GarageProfileScreen() {
   const { currentUser, logout } = useAuth();
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [garageData, setGarageData] = useState<Garage | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [updatingLocation, setUpdatingLocation] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); // Clé pour forcer le rechargement
 
-  // Charger les données du garage au chargement de l'écran
-  useEffect(() => {
-    const loadGarageData = async () => {
-      if (!currentUser) return;
+  // Fonction pour charger les données du garage
+  const loadGarageData = async () => {
+    if (!currentUser) return;
 
-      // console.log('--- currentUser ---', JSON.stringify(currentUser, null, 2));
+    try {
+      setLoading(true);
 
-      try {
-        setLoading(true);
-
-        // Ici, nous utilisons les données de l'utilisateur actuel comme données de garage
-        // Dans une implémentation complète, vous feriez un appel API pour obtenir les détails du garage
-        setGarageData({
-          id: currentUser.id,
-          name: currentUser.name,
-          email: currentUser.email,
-          phone: currentUser.phone || 'Non spécifié',
-          address: currentUser.address || 'Adresse non spécifiée',
-          location: currentUser.location || { latitude: 0, longitude: 0 },
-          services: currentUser.services || [],
-          openingHours: currentUser.openingHours || 'Non spécifié',
-          rating: currentUser.rating || 0,
-          isOpen: true,
-          distance: 0,
-          role: currentUser.role,
-        });
-      } catch (err) {
-        console.error('Erreur lors du chargement des données du garage:', err);
-        setError('Impossible de charger les données du profil');
-      } finally {
-        setLoading(false);
+      // Récupérer le token d'authentification
+      const token = await AsyncStorage.getItem('authToken');
+      if (!token) {
+        throw new Error("Token d'authentification non trouvé");
       }
-    };
 
+      // Récupérer les compétences depuis l'API (via le profil du garage)
+      let skills = [];
+      try {
+        const profileResponse = await fetch(`${API_URL}/garages/profile`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          skills = profileData.garage?.skills || [];
+        } else {
+          console.warn(
+            "Impossible de récupérer le profil du garage depuis l'API"
+          );
+          // En cas d'erreur, on utilise un tableau vide pour les compétences
+        }
+      } catch (profileErr) {
+        console.error(
+          'Erreur lors de la récupération du profil du garage:',
+          profileErr
+        );
+        // En cas d'erreur, on utilise un tableau vide pour les compétences
+      }
+
+      // Ici, nous utilisons les données de l'utilisateur actuel comme données de garage
+      // avec les compétences récupérées depuis l'API
+      setGarageData({
+        id: currentUser.id,
+        name: currentUser.name,
+        email: currentUser.email,
+        phone: currentUser.phone || 'Non spécifié',
+        address: currentUser.address || 'Adresse non spécifiée',
+        location: currentUser.location || { latitude: 0, longitude: 0 },
+        services: currentUser.services || [],
+        openingHours: currentUser.openingHours || 'Non spécifié',
+        rating: currentUser.rating || 0,
+        isOpen: true,
+        distance: 0,
+        role: currentUser.role,
+        skills: skills, // Utiliser les compétences récupérées depuis l'API
+      });
+    } catch (err) {
+      console.error('Erreur lors du chargement des données du garage:', err);
+      setError('Impossible de charger les données du profil');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Charger les données du garage au chargement initial et lorsque currentUser ou refreshKey change
+  useEffect(() => {
     loadGarageData();
-  }, [currentUser]);
+  }, [currentUser, refreshKey]);
 
   const handleLogout = () => {
     Alert.alert('Déconnexion', 'Êtes-vous sûr de vouloir vous déconnecter ?', [
@@ -338,6 +376,53 @@ export default function GarageProfileScreen() {
             </View>
           </View>
 
+          {/* Section des compétences */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Compétences</Text>
+
+            {garageData?.skills && garageData.skills.length > 0 ? (
+              <View style={styles.infoCard}>
+                <View style={styles.skillsContainer}>
+                  {garageData.skills.map((skill, index) => (
+                    <View key={index} style={styles.skillTag}>
+                      <Text style={styles.skillText}>{skill}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                <View style={styles.separator} />
+
+                <TouchableOpacity
+                  style={styles.skillsButton}
+                  onPress={() => router.push('/extends/skills')}
+                >
+                  <Award size={20} color="#fff" />
+                  <Text style={styles.skillsButtonText}>
+                    Modifier mes compétences
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.infoCard}>
+                <Text style={styles.noSkillsText}>
+                  Vous n'avez pas encore ajouté de compétences.
+                </Text>
+
+                <View style={styles.separator} />
+
+                <TouchableOpacity
+                  style={styles.skillsButton}
+                  onPress={() => router.push('/extends/skills')}
+                >
+                  <Award size={20} color="#fff" />
+                  <Text style={styles.skillsButtonText}>
+                    Ajouter des compétences
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
           <View style={styles.section}>
             <TouchableOpacity
               style={styles.logoutButton}
@@ -386,6 +471,44 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  skillsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  skillTag: {
+    backgroundColor: '#eff6ff',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    marginBottom: 8,
+  },
+  skillText: {
+    color: '#2563eb',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  noSkillsText: {
+    fontSize: 16,
+    color: '#64748b',
+    textAlign: 'center',
+    marginVertical: 16,
+  },
+  skillsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2563eb',
+    padding: 12,
+    borderRadius: 8,
+    gap: 12,
+  },
+  skillsButtonText: {
+    color: '#fff',
+    fontSize: 15,
     fontWeight: '600',
   },
   servicesContainer: {

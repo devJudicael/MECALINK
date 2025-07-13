@@ -255,6 +255,19 @@ export default function GarageDetailsScreen() {
 
             <Text style={styles.description}>{garage.description}</Text>
 
+            {garage.skills && garage.skills.length > 0 && (
+              <View style={styles.skillsContainer}>
+                <Text style={styles.skillsTitle}>Compétences</Text>
+                <View style={styles.skillsList}>
+                  {garage.skills.map((skill: string, index: number) => (
+                    <View key={index} style={styles.skillTag}>
+                      <Text style={styles.skillText}>{skill}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
             {/* <View style={styles.servicesContainer}>
               <Text style={styles.servicesTitle}>Services proposés</Text>
               <View style={styles.servicesList}>
@@ -486,6 +499,34 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   serviceText: {
+    fontSize: 14,
+    color: '#2563EB',
+    fontWeight: '500',
+  },
+  skillsContainer: {
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    paddingTop: 20,
+    marginTop: 20,
+  },
+  skillsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: 12,
+  },
+  skillsList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  skillTag: {
+    backgroundColor: '#eff6ff',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  skillText: {
     fontSize: 14,
     color: '#2563EB',
     fontWeight: '500',
