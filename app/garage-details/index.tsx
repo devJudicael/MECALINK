@@ -43,7 +43,7 @@ export default function GarageDetailsScreen() {
   const [commentsModalVisible, setCommentsModalVisible] = useState(false);
 
   //
-  const { comments } = useCommentStore();
+  const { comments, fetchGarageComments } = useCommentStore();
   const calculateAverageRating = () => {
     if (comments.length === 0) return 0;
     const sum = comments.reduce((acc, comment) => acc + comment.rating, 0);
@@ -62,6 +62,7 @@ export default function GarageDetailsScreen() {
           //   '-- garageDetails  -- ',
           //   JSON.stringify(garageDetails, null, 2)
           // );
+          await fetchGarageComments(garageId as string);
           setGarage(garageDetails);
           setSelectedGarage(garageDetails);
         } else {

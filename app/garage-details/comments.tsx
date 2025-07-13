@@ -14,6 +14,7 @@ import { useCommentStore } from '@/stores/comments';
 import { useAuth } from '@/context/AuthContext';
 import { Comment } from '@/types/garages';
 import { Star, X, Send } from 'lucide-react-native';
+import { useGarageStore } from '@/stores/garages';
 
 type CommentsModalProps = {
   visible: boolean;
@@ -32,6 +33,7 @@ export default function CommentsModal({
   const [newComment, setNewComment] = useState('');
   const [rating, setRating] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { getGarageById, setSelectedGarage } = useGarageStore();
 
   useEffect(() => {
     if (visible && garageId) {
@@ -62,6 +64,13 @@ export default function CommentsModal({
         setNewComment('');
         setRating(5);
         Alert.alert('Succès', 'Votre commentaire a été ajouté avec succès');
+
+        const garageDetails = await getGarageById(garageId);
+        // console.log(
+        //   '--- garageDetails ---',
+        //   JSON.stringify(garageDetails, null, 2)
+        // );
+        setSelectedGarage(garageDetails);
       }
     } catch (error) {
       console.error('Error submitting comment:', error);
@@ -195,6 +204,7 @@ export default function CommentsModal({
                 value={newComment}
                 onChangeText={setNewComment}
                 multiline
+                placeholderTextColor="#94a3b8"
               />
               <TouchableOpacity
                 style={[
@@ -359,6 +369,7 @@ const styles = StyleSheet.create({
     paddingRight: 50,
     fontSize: 16,
     maxHeight: 100,
+    color: '#000',
   },
   sendButton: {
     position: 'absolute',
