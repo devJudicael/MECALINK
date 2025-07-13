@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
-import { UserPlus, Car, Wrench, MapPin } from 'lucide-react-native';
+import { UserPlus, Car, Wrench, MapPin, Eye, EyeOff } from 'lucide-react-native';
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
@@ -23,6 +23,7 @@ export default function RegisterScreen() {
   const [role, setRole] = useState<'client' | 'garage'>('client');
   const [address, setAddress] = useState('Abidjan');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { register, registerGarage } = useAuth();
   const router = useRouter();
@@ -169,14 +170,26 @@ export default function RegisterScreen() {
               autoCapitalize="none"
             />
 
-            <TextInput
-              style={styles.input}
-              placeholder="Mot de passe"
-              placeholderTextColor="#94a3b8"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Mot de passe"
+                placeholderTextColor="#94a3b8"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <Eye size={20} color="#64748b" />
+                ) : (
+                  <EyeOff size={20} color="#64748b" />
+                )}
+              </TouchableOpacity>
+            </View>
 
             {role === 'garage' && (
               <View style={styles.addressContainer}>
@@ -302,6 +315,28 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 16,
     color: '#1e293b',
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    paddingVertical: 0,
+    paddingHorizontal: 16,
+  },
+  passwordInput: {
+    flex: 1,
+    height: 52,
+    fontSize: 16,
+    color: '#1e293b',
+    paddingVertical: 16,
+    paddingRight: 0,
+    paddingLeft: 0,
+  },
+  eyeButton: {
+    padding: 8,
   },
   addressContainer: {
     flexDirection: 'row',
