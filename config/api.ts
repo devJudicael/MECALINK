@@ -36,6 +36,13 @@ export const API_ENDPOINTS = {
     HISTORY: `${API_URL}/checklists`,
     DETAILS: (id: string) => `${API_URL}/checklists/${id}`,
   },
+  // Publicités
+  ADVERTISEMENTS: {
+    ALL: `${API_URL}/advertisements`,
+    CREATE: `${API_URL}/advertisements`,
+    UPDATE: (id: string) => `${API_URL}/advertisements/${id}`,
+    DELETE: (id: string) => `${API_URL}/advertisements/${id}`,
+  },
 };
 
 // Fonction pour obtenir les headers d'authentification

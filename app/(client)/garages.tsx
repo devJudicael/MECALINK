@@ -15,6 +15,7 @@ import * as Location from 'expo-location';
 import type { Garage } from '@/types';
 import { Search, MapPin, Star, Clock, ChevronRight } from 'lucide-react-native';
 import { useGarageStore } from '@/stores/garages';
+import CarouselOffers from '@/components/CarouselOffers';
 
 export default function GaragesListScreen() {
   const [garages, setGarages] = useState<Garage[]>([]);
@@ -170,6 +171,14 @@ export default function GaragesListScreen() {
         <Text style={styles.subtitle}>
           {filteredGarages.length} garage(s) trouvé(s)
         </Text>
+      </View>
+
+      <View
+        style={{
+          padding: 2,
+        }}
+      >
+        <CarouselOffers />
       </View>
 
       <View style={styles.searchContainer}>

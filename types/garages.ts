@@ -17,8 +17,8 @@ export type Garage = {
 
 export type Comment = {
   _id: string;
-  garageId: string;
-  userId: string;
+  garage: string;
+  user: string;
   userName: string;
   rating: number;
   comment: string;
