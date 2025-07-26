@@ -65,6 +65,7 @@ export default function ClientLayout() {
           tabBarIcon: ({ size, color }) => <User size={size} color={color} />,
         }}
       />
+     
     </Tabs>
   );
 }

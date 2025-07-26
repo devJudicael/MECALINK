@@ -195,6 +195,7 @@ const styles = StyleSheet.create({
   listContainer: {
     padding: 20,
     gap: 16,
+    paddingBottom: 80,
   },
   requestCard: {
     backgroundColor: '#fff',

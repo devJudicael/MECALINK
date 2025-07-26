@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   View,
   Text,
@@ -6,12 +5,15 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Alert,
+  ScrollView,
 } from 'react-native';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { User, Mail, Phone, LogOut, Car } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
   const { currentUser, logout } = useAuth();
+  const router = useRouter();
 
   const handleLogout = () => {
     Alert.alert('Déconnexion', 'Êtes-vous sûr de vouloir vous déconnecter ?', [
@@ -26,11 +28,9 @@ export default function ProfileScreen() {
       },
     ]);
   };
-
   if (!currentUser) {
     return null;
   }
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -40,8 +40,25 @@ export default function ProfileScreen() {
         <Text style={styles.name}>{currentUser.name}</Text>
         <Text style={styles.role}>Client</Text>
       </View>
+      <ScrollView style={styles.content}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Fiches de Pré-Démarrage</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => router.push('/extends/checklist-form')}
+          >
+            <Text style={styles.buttonText}>
+              Remplir Fiche de Pré-démarrage
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => router.push('/extends/checklist-history')}
+          >
+            <Text style={styles.buttonText}>Historique des Fiches</Text>
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.content}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Informations personnelles</Text>
 
@@ -81,13 +98,26 @@ export default function ProfileScreen() {
             <LogOut size={20} color="#dc2626" />
             <Text style={styles.logoutText}>Se déconnecter</Text>
           </TouchableOpacity>
+          <View style={styles.spacer} />
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  button: {
+    backgroundColor: '#2563EB',
+    padding: 16,
+    borderRadius: 12,
+    marginVertical: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
@@ -181,5 +211,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#dc2626',
+  },
+  spacer: {
+    height: 60,
   },
 });
