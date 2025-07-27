@@ -18,6 +18,7 @@ import {
   Circle as XCircle,
   CircleAlert as AlertCircle,
 } from 'lucide-react-native';
+import CarouselOffers from '@/components/CarouselOffers';
 
 export default function HistoryScreen() {
   const { currentUser } = useAuth();
@@ -122,6 +123,14 @@ export default function HistoryScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Historique des demandes</Text>
         <Text style={styles.subtitle}>{requests.length} demandes</Text>
+      </View>
+
+      <View
+        style={{
+          padding: 2,
+        }}
+      >
+        <CarouselOffers />
       </View>
 
       {requests.length === 0 ? (

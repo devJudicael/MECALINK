@@ -100,33 +100,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!response.ok) {
         Alert.alert(
           'Erreur de connexion',
-          data.message || 'Email ou mot de passe incorrect'
+          data.message || data.msg || 'Email ou mot de passe incorrect'
         );
         return {
           success: false,
-          userType: null,
+          userRole: null,
         };
       }
 
       // Créer un objet utilisateur à partir de la réponse de l'API
       const user: User = {
-        id: data.user.id,
-        name: data?.user?.name,
-        email: data?.user?.email,
-        phone: data?.user?.phone,
-        role: data?.user?.role,
-        location: data?.garage?.location,
-        address: data?.garage?.address,
+        id: data.data.user.id,
+        name: data.data.user.name,
+        email: data.data.user.email,
+        phone: data.data.user.phone,
+        role: data.data.user.role,
+        location: data.data.user.location,
+        address: data.data.garage?.address,
       };
-
-      // console.log('--- user front --- : ', JSON.stringify(user, null, 2));
 
       setCurrentUser(user);
       await AsyncStorage.setItem('currentUser', JSON.stringify(user));
-      await AsyncStorage.setItem('authToken', data.token);
+      await AsyncStorage.setItem('authToken', data.data.token);
       return {
         success: true,
-        userRole: data.user.role,
+        userRole: data.data.user.role,
       };
     } catch (error) {
       console.error('Login error:', error);

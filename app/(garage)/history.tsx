@@ -23,6 +23,7 @@ import {
   RefreshCw,
   Navigation,
 } from 'lucide-react-native';
+import CarouselOffers from '@/components/CarouselOffers';
 
 export default function GarageHistoryScreen() {
   const { currentUser } = useAuth();
@@ -233,6 +234,14 @@ export default function GarageHistoryScreen() {
             />
           </TouchableOpacity>
         </View>
+      </View>
+
+      <View
+        style={{
+          padding: 2,
+        }}
+      >
+        <CarouselOffers />
       </View>
 
       {processedRequests.length === 0 ? (

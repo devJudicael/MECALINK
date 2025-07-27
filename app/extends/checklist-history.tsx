@@ -41,7 +41,7 @@ const ChecklistHistory = () => {
           signal: controller.signal,
         });
         clearTimeout(timeoutId);
-        console.log('Réponse historique:', response.data);
+        // console.log('Réponse historique:', response.data);
         setHistory(response.data);
       } catch (axiosError) {
         clearTimeout(timeoutId);

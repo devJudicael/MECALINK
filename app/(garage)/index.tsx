@@ -22,6 +22,7 @@ import {
   Circle as XCircle,
   RefreshCw,
 } from 'lucide-react-native';
+import CarouselOffers from '@/components/CarouselOffers';
 
 export default function GarageRequestsScreen() {
   const { currentUser } = useAuth();
@@ -218,6 +219,14 @@ export default function GarageRequestsScreen() {
             />
           </TouchableOpacity>
         </View>
+      </View>
+
+      <View
+        style={{
+          padding: 2,
+        }}
+      >
+        <CarouselOffers />
       </View>
 
       {pendingRequests.length === 0 ? (

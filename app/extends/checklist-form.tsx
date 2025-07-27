@@ -14,9 +14,11 @@ import axios from 'axios';
 import { API_ENDPOINTS } from '../../config/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
+import { useAuth } from '../../context/AuthContext';
 
 export default function ChecklistForm() {
   const router = useRouter();
+  const { currentUser } = useAuth();
   const [form, setForm] = useState({
     time: '',
     registration: '',
@@ -61,9 +63,39 @@ export default function ChecklistForm() {
   }, []);
 
   const handleSubmit = async () => {
+    // Vérification des champs requis
+    if (!form.registration || !form.mileage || !form.time) {
+      Alert.alert('Erreur', 'Merci de remplir tous les champs obligatoires (immatriculation, kilométrage, heure)');
+      return;
+    }
+    // Vérification des sous-objets essentiels
+    if (!form.exteriorChecks || !form.mechanicalChecks || !form.interiorChecks) {
+      Alert.alert('Erreur', 'Merci de compléter tous les contrôles extérieurs, mécaniques et intérieurs');
+      return;
+    }
+    // Vérification rapide des champs principaux dans chaque sous-objet (ajuster selon vos besoins)
+    const ext = form.exteriorChecks;
+    const mec = form.mechanicalChecks;
+    const int = form.interiorChecks;
+    if (!ext.tires || !ext.wheelNuts || !ext.body || !ext.spareTire || !ext.windshield || !ext.wipers || !ext.lights || !ext.indicators) {
+      Alert.alert('Erreur', 'Merci de compléter tous les contrôles extérieurs');
+      return;
+    }
+    if (!mec.oilLevel || !mec.coolant || !mec.battery || !mec.belt) {
+      Alert.alert('Erreur', 'Merci de compléter tous les contrôles mécaniques');
+      return;
+    }
+    if (!int.seatsBelts || !int.brakes || !int.ac || !int.fourByFour || !int.extinguisher || !int.jackTools) {
+      Alert.alert('Erreur', 'Merci de compléter tous les contrôles intérieurs');
+      return;
+    }
+    if (!currentUser || !currentUser.id) {
+      Alert.alert('Erreur', "Impossible d'identifier l'utilisateur. Veuillez vous reconnecter.");
+      return;
+    }
     try {
       const token = await AsyncStorage.getItem('authToken');
-      const response = await axios.post(API_ENDPOINTS.CHECKLISTS.CREATE, form, {
+      const response = await axios.post(API_ENDPOINTS.CHECKLISTS.CREATE, { ...form, user: currentUser.id }, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setError('');
