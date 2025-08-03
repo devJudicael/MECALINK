@@ -23,6 +23,7 @@ export default function ChecklistForm() {
     time: '',
     registration: '',
     mileage: '',
+    fuel: 'Oui',
     exteriorChecks: {
       tires: 'Bon',
       wheelNuts: 'Oui',
@@ -51,6 +52,7 @@ export default function ChecklistForm() {
     },
     observations: '',
   });
+  const [brandDisabled, setBrandDisabled] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -62,12 +64,42 @@ export default function ChecklistForm() {
     setForm((prev) => ({ ...prev, time: timeStr }));
   }, []);
 
+  // Récupérer la marque du véhicule précédemment utilisée
+  useEffect(() => {
+    const fetchVehicleBrand = async () => {
+      try {
+        const token = await AsyncStorage.getItem('authToken');
+        const response = await axios.get(
+          API_ENDPOINTS.CHECKLISTS.VEHICLE_BRAND,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (response.data.registration) {
+          setForm((prev) => ({
+            ...prev,
+            registration: response.data.registration,
+          }));
+          setBrandDisabled(true); // Désactiver le champ si une marque existe déjà
+        }
+      } catch (error) {
+        console.error(
+          'Erreur lors de la récupération de la marque du véhicule:',
+          error
+        );
+      }
+    };
+
+    fetchVehicleBrand();
+  }, []);
+
   const handleSubmit = async () => {
     // Vérification des champs requis
-    if (!form.registration || !form.mileage || !form.time) {
+    if (!form.registration || !form.mileage || !form.time || !form.fuel) {
       Alert.alert(
         'Erreur',
-        'Merci de remplir tous les champs obligatoires (immatriculation, kilométrage, heure)'
+        'Merci de remplir tous les champs obligatoires (marque de vehicule, kilométrage, carburant)'
       );
       return;
     }
@@ -150,11 +182,12 @@ export default function ChecklistForm() {
         contentContainerStyle={styles.contentContainer}
       >
         <TextInput
-          placeholder="MARQUE DE VÉHICULE"
+          placeholder="MARQUE DE VÉHICULE"
           value={form.registration}
           onChangeText={(t) => setForm({ ...form, registration: t })}
-          style={styles.input}
+          style={[styles.input, brandDisabled && styles.disabledInput]}
           placeholderTextColor={'#999'}
+          editable={!brandDisabled}
         />
         <TextInput
           placeholder="Kilométrage"
@@ -164,6 +197,19 @@ export default function ChecklistForm() {
           keyboardType="numeric"
           placeholderTextColor={'#999'}
         />
+        <Text style={styles.pickerLabel}>
+          Avez-vous suffisamment du carburant pour faire le trajet aller-retour?
+        </Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={form.fuel}
+            onValueChange={(v) => setForm({ ...form, fuel: v })}
+            style={styles.picker}
+          >
+            <Picker.Item label="Oui" value="Oui" />
+            <Picker.Item label="Non" value="Non" />
+          </Picker>
+        </View>
         {/* Tous les Pickers comme dans profile.tsx */}
         <Text style={styles.pickerLabel}>État Pneus</Text>
         <View style={styles.pickerContainer}>
@@ -544,6 +590,10 @@ const styles = StyleSheet.create({
     padding: 12,
     marginVertical: 8,
     backgroundColor: '#fff',
+  },
+  disabledInput: {
+    backgroundColor: '#f1f5f9',
+    color: '#64748b',
   },
   submitButton: {
     backgroundColor: '#2563EB',

@@ -123,6 +123,10 @@ const ChecklistDetails = () => {
               <Text style={styles.infoLabel}>Kilométrage:</Text>
               <Text style={styles.infoValue}>{checklist.mileage}</Text>
             </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Carburant:</Text>
+              <Text style={styles.infoValue}>{checklist.fuel}</Text>
+            </View>
           </View>
         </View>
 

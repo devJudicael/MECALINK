@@ -248,7 +248,7 @@ export default function GarageSkillsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      {/* <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
@@ -256,7 +256,7 @@ export default function GarageSkillsScreen() {
           <ArrowLeft size={24} color="#1e293b" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Compétences</Text>
-      </View>
+      </View> */}
 
       <ScrollView style={styles.content}>
         <View style={styles.section}>
@@ -271,6 +271,7 @@ export default function GarageSkillsScreen() {
                 <TextInput
                   style={styles.skillInput}
                   placeholder={`Compétence ${index + 1}`}
+                  placeholderTextColor="#64748b"
                   value={skill}
                   onChangeText={(text) => handleSkillChange(text, index)}
                   maxLength={30}

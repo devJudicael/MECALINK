@@ -155,10 +155,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const data = await response.json();
 
-      // console.log(
-      //   '-- response signup client -- ',
-      //   JSON.stringify(data, null, 2)
-      // );
+      console.log(
+        '-- response signup client -- ',
+        JSON.stringify(data, null, 2)
+      );
 
       if (!response.ok) {
         Alert.alert(
@@ -170,18 +170,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Créer un objet utilisateur à partir de la réponse de l'API
       const user: User = {
-        id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-        phone: data.user.phone,
-        role: data.user.role,
+        id: data.data.user.id,
+        name: data.data.user.name,
+        email: data.data.user.email,
+        phone: data.data.user.phone,
+        role: data.data.user.role,
       };
 
       setCurrentUser(user);
       await AsyncStorage.setItem('currentUser', JSON.stringify(user));
-      await AsyncStorage.setItem('authToken', data.token);
+      await AsyncStorage.setItem('authToken', data.data.token);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration error:', error);
       Alert.alert(
         "Erreur d'inscription",
@@ -199,10 +199,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   ): Promise<boolean> => {
     try {
       // Afficher les données pour le débogage
-      // console.log(
-      //   '-- userData garage to api -- : ',
-      //   JSON.stringify(userData, null, 2)
-      // );
+      console.log(
+        '-- userData garage to api -- : ',
+        JSON.stringify(userData, null, 2)
+      );
 
       const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
@@ -214,10 +214,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const data = await response.json();
 
-      // console.log(
-      //   '-- response signup garage from api -- : ',
-      //   JSON.stringify(data, null, 2)
-      // );
+      console.log(
+        '-- response signup garage from api -- : ',
+        JSON.stringify(data, null, 2)
+      );
 
       if (!response.ok) {
         Alert.alert(
@@ -229,17 +229,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Créer un objet utilisateur à partir de la réponse de l'API
       const user: User = {
-        id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-        phone: data.user.phone,
-        role: data.user.role,
-        location: data.user.location,
+        id: data.data.user.id,
+        name: data.data.user.name,
+        email: data.data.user.email,
+        phone: data.data.user.phone,
+        role: data.data.user.role,
+        location: data.data.user.location,
       };
 
       setCurrentUser(user);
       await AsyncStorage.setItem('currentUser', JSON.stringify(user));
-      await AsyncStorage.setItem('authToken', data.token);
+      await AsyncStorage.setItem('authToken', data.data.token);
       return true;
     } catch (error) {
       console.error('Garage registration error from api:', error);

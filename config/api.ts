@@ -3,8 +3,8 @@
 // URL de base de l'API
 // Utiliser l'adresse IP de votre ordinateur au lieu de localhost
 // car sur un appareil mobile, localhost fait référence à l'appareil lui-même
-export const API_URL = 'https://mecalinkapi-3dmdr00n.b4a.run/api';
-// export const API_URL = 'http://192.168.1.4:5000/api';
+// export const API_URL = 'https://mecalinkapi-3dmdr00n.b4a.run/api';
+export const API_URL = 'http://192.168.1.2:5000/api';
 
 // Endpoints de l'API
 export const API_ENDPOINTS = {
@@ -35,6 +35,7 @@ export const API_ENDPOINTS = {
     CREATE: `${API_URL}/checklists`,
     HISTORY: `${API_URL}/checklists`,
     DETAILS: (id: string) => `${API_URL}/checklists/${id}`,
+    VEHICLE_BRAND: `${API_URL}/checklists/vehicle-brand`,
   },
   // Publicités
   ADVERTISEMENTS: {
