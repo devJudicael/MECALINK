@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Map, List, History, User } from 'lucide-react-native';
+import { Map, List, History, User, ListCheck } from 'lucide-react-native';
 
 export default function ClientLayout() {
   return (
@@ -59,13 +59,22 @@ export default function ClientLayout() {
         }}
       />
       <Tabs.Screen
+        name="checklist"
+        options={{
+          title: 'Fiche',
+          tabBarIcon: ({ size, color }) => (
+            <ListCheck size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profil',
           tabBarIcon: ({ size, color }) => <User size={size} color={color} />,
         }}
       />
-     
     </Tabs>
   );
 }

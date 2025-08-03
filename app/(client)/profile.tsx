@@ -43,14 +43,7 @@ export default function ProfileScreen() {
       <ScrollView style={styles.content}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Fiches de Pré-Démarrage</Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => router.push('/extends/checklist-form')}
-          >
-            <Text style={styles.buttonText}>
-              Remplir Fiche de Pré-démarrage
-            </Text>
-          </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.button}
             onPress={() => router.push('/extends/checklist-history')}

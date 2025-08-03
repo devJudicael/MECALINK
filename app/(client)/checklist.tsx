@@ -65,19 +65,38 @@ export default function ChecklistForm() {
   const handleSubmit = async () => {
     // Vérification des champs requis
     if (!form.registration || !form.mileage || !form.time) {
-      Alert.alert('Erreur', 'Merci de remplir tous les champs obligatoires (immatriculation, kilométrage, heure)');
+      Alert.alert(
+        'Erreur',
+        'Merci de remplir tous les champs obligatoires (immatriculation, kilométrage, heure)'
+      );
       return;
     }
     // Vérification des sous-objets essentiels
-    if (!form.exteriorChecks || !form.mechanicalChecks || !form.interiorChecks) {
-      Alert.alert('Erreur', 'Merci de compléter tous les contrôles extérieurs, mécaniques et intérieurs');
+    if (
+      !form.exteriorChecks ||
+      !form.mechanicalChecks ||
+      !form.interiorChecks
+    ) {
+      Alert.alert(
+        'Erreur',
+        'Merci de compléter tous les contrôles extérieurs, mécaniques et intérieurs'
+      );
       return;
     }
     // Vérification rapide des champs principaux dans chaque sous-objet (ajuster selon vos besoins)
     const ext = form.exteriorChecks;
     const mec = form.mechanicalChecks;
     const int = form.interiorChecks;
-    if (!ext.tires || !ext.wheelNuts || !ext.body || !ext.spareTire || !ext.windshield || !ext.wipers || !ext.lights || !ext.indicators) {
+    if (
+      !ext.tires ||
+      !ext.wheelNuts ||
+      !ext.body ||
+      !ext.spareTire ||
+      !ext.windshield ||
+      !ext.wipers ||
+      !ext.lights ||
+      !ext.indicators
+    ) {
       Alert.alert('Erreur', 'Merci de compléter tous les contrôles extérieurs');
       return;
     }
@@ -85,23 +104,37 @@ export default function ChecklistForm() {
       Alert.alert('Erreur', 'Merci de compléter tous les contrôles mécaniques');
       return;
     }
-    if (!int.seatsBelts || !int.brakes || !int.ac || !int.fourByFour || !int.extinguisher || !int.jackTools) {
+    if (
+      !int.seatsBelts ||
+      !int.brakes ||
+      !int.ac ||
+      !int.fourByFour ||
+      !int.extinguisher ||
+      !int.jackTools
+    ) {
       Alert.alert('Erreur', 'Merci de compléter tous les contrôles intérieurs');
       return;
     }
     if (!currentUser || !currentUser.id) {
-      Alert.alert('Erreur', "Impossible d'identifier l'utilisateur. Veuillez vous reconnecter.");
+      Alert.alert(
+        'Erreur',
+        "Impossible d'identifier l'utilisateur. Veuillez vous reconnecter."
+      );
       return;
     }
     try {
       const token = await AsyncStorage.getItem('authToken');
-      const response = await axios.post(API_ENDPOINTS.CHECKLISTS.CREATE, { ...form, user: currentUser.id }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.post(
+        API_ENDPOINTS.CHECKLISTS.CREATE,
+        { ...form, user: currentUser.id },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setError('');
       Alert.alert('Succès', 'Fiche soumise avec succès');
       router.back();
-    } catch (err) {
+    } catch (err: any) {
       setError(err.response?.data?.message || 'Erreur lors de la soumission');
       Alert.alert(
         'Erreur',
@@ -117,10 +150,11 @@ export default function ChecklistForm() {
         contentContainerStyle={styles.contentContainer}
       >
         <TextInput
-          placeholder="Immatriculation"
+          placeholder="MARQUE DE VÉHICULE"
           value={form.registration}
           onChangeText={(t) => setForm({ ...form, registration: t })}
           style={styles.input}
+          placeholderTextColor={'#999'}
         />
         <TextInput
           placeholder="Kilométrage"
@@ -128,6 +162,7 @@ export default function ChecklistForm() {
           onChangeText={(t) => setForm({ ...form, mileage: t })}
           style={styles.input}
           keyboardType="numeric"
+          placeholderTextColor={'#999'}
         />
         {/* Tous les Pickers comme dans profile.tsx */}
         <Text style={styles.pickerLabel}>État Pneus</Text>
@@ -147,7 +182,7 @@ export default function ChecklistForm() {
             <Picker.Item label="Mauvais" value="Mauvais" />
           </Picker>
         </View>
-        <Text style={styles.pickerLabel}>Écrous des roues</Text>
+        <Text style={styles.pickerLabel}>Écrous des roues (bien serrés)</Text>
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={form.exteriorChecks.wheelNuts}
@@ -180,7 +215,9 @@ export default function ChecklistForm() {
             <Picker.Item label="Bosses" value="Bosses" />
           </Picker>
         </View>
-        <Text style={styles.pickerLabel}>Pneu de secours</Text>
+        <Text style={styles.pickerLabel}>
+          Pneu de secours ( présence + pression )
+        </Text>
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={form.exteriorChecks.spareTire}
@@ -262,7 +299,9 @@ export default function ChecklistForm() {
             <Picker.Item label="Anormal" value="Anormal" />
           </Picker>
         </View>
-        <Text style={styles.pickerLabel}>Niveau d'huile</Text>
+        <Text style={styles.pickerLabel}>
+          Niveau d'huile moteur et huile de frein
+        </Text>
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={form.mechanicalChecks.oilLevel}
@@ -294,7 +333,9 @@ export default function ChecklistForm() {
             <Picker.Item label="Fuite" value="Fuite" />
           </Picker>
         </View>
-        <Text style={styles.pickerLabel}>Batterie</Text>
+        <Text style={styles.pickerLabel}>
+          Batterie (fixation, câbles, corrosion)
+        </Text>
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={form.mechanicalChecks.battery}
@@ -376,7 +417,7 @@ export default function ChecklistForm() {
             <Picker.Item label="Non fonctionnel" value="Non fonctionnel" />
           </Picker>
         </View>
-        <Text style={styles.pickerLabel}>Système 4x4</Text>
+        <Text style={styles.pickerLabel}>Système 4x4 (si applicable) </Text>
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={form.interiorChecks.fourByFour}
@@ -410,7 +451,7 @@ export default function ChecklistForm() {
             <Picker.Item label="Absent" value="Absent" />
           </Picker>
         </View>
-        <Text style={styles.pickerLabel}>Trousse de secours</Text>
+        <Text style={styles.pickerLabel}>Boite à pharmacie</Text>
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={form.interiorChecks.firstAid}
@@ -427,7 +468,7 @@ export default function ChecklistForm() {
             <Picker.Item label="Absente" value="Absente" />
           </Picker>
         </View>
-        <Text style={styles.pickerLabel}>Triangle</Text>
+        <Text style={styles.pickerLabel}>Triangle de signalisation</Text>
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={form.interiorChecks.triangle}
@@ -466,6 +507,7 @@ export default function ChecklistForm() {
           onChangeText={(t) => setForm({ ...form, observations: t })}
           multiline
           style={styles.input}
+          placeholderTextColor="#999"
         />
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitButtonText}>Soumettre</Text>
@@ -538,6 +580,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   picker: {
-    height: 50,
+    height: 60,
+    color: '#1e293b',
+    flex: 1,
   },
 });

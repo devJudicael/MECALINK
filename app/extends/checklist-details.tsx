@@ -145,7 +145,7 @@ const ChecklistDetails = () => {
               </Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Écrous des roues:</Text>
+              <Text style={styles.infoLabel}>Écrous des roues (bien serrés):</Text>
               <Text style={styles.infoValue}>
                 {checklist.exteriorChecks.wheelNuts}
               </Text>
@@ -157,7 +157,7 @@ const ChecklistDetails = () => {
               </Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Pneu de secours:</Text>
+              <Text style={styles.infoLabel}>Pneu de secours ( présence + pression ):</Text>
               <Text style={styles.infoValue}>
                 {checklist.exteriorChecks.spareTire}
               </Text>
@@ -193,7 +193,7 @@ const ChecklistDetails = () => {
           <Text style={styles.sectionTitle}>Contrôles Mécaniques</Text>
           <View style={styles.card}>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Niveau d'huile:</Text>
+              <Text style={styles.infoLabel}>Niveau d'huile moteur et huile de frein:</Text>
               <Text style={styles.infoValue}>
                 {checklist.mechanicalChecks.oilLevel}
               </Text>
@@ -205,7 +205,7 @@ const ChecklistDetails = () => {
               </Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Batterie:</Text>
+              <Text style={styles.infoLabel}>Batterie (fixation, câbles, corrosion):</Text>
               <Text style={styles.infoValue}>
                 {checklist.mechanicalChecks.battery}
               </Text>
@@ -241,7 +241,7 @@ const ChecklistDetails = () => {
               </Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Système 4x4:</Text>
+              <Text style={styles.infoLabel}>Système 4x4 (si applicable):</Text>
               <Text style={styles.infoValue}>
                 {checklist.interiorChecks.fourByFour}
               </Text>
@@ -253,13 +253,13 @@ const ChecklistDetails = () => {
               </Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Trousse de secours:</Text>
+              <Text style={styles.infoLabel}>Boite à pharmacie:</Text>
               <Text style={styles.infoValue}>
                 {checklist.interiorChecks.firstAid}
               </Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Triangle:</Text>
+              <Text style={styles.infoLabel}>Triangle de signalisation:</Text>
               <Text style={styles.infoValue}>
                 {checklist.interiorChecks.triangle}
               </Text>
