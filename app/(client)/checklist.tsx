@@ -15,6 +15,7 @@ import { API_ENDPOINTS } from '../../config/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
+import HeaderWithNotification from '@/components/HeaderWithNotification';
 
 export default function ChecklistForm() {
   const router = useRouter();
@@ -177,6 +178,13 @@ export default function ChecklistForm() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <HeaderWithNotification 
+        title="Fiche de Pré-Démarrage" 
+        backgroundColor="#fff"
+        textColor="#1e293b"
+        iconColor="#2563EB"
+        showBackButton={true}
+      />
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}

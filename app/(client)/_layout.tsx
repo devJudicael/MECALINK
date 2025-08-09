@@ -1,8 +1,12 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Map, List, History, User, ListCheck } from 'lucide-react-native';
-
+import { Map, List, History, User, ListCheck, Bell } from 'lucide-react-native';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 export default function ClientLayout() {
+  const { expoPushToken } = usePushNotifications();
+
+  console.log('--- expoPushToken ----> ', expoPushToken);
+
   return (
     <Tabs
       screenOptions={{
@@ -65,6 +69,14 @@ export default function ClientLayout() {
           tabBarIcon: ({ size, color }) => (
             <ListCheck size={size} color={color} />
           ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          title: 'Notifications',
+          tabBarIcon: ({ size, color }) => <Bell size={size} color={color} />,
         }}
       />
 

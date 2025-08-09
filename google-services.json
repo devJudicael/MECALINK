@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "803619967907",
+    "project_id": "mecalink-a57fc",
+    "storage_bucket": "mecalink-a57fc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:803619967907:android:f689451e1281fc0f8f4016",
+        "android_client_info": {
+          "package_name": "com.devjudicael.MECALINK"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArhLmq5Il7O-SVYHzWdwwSVF8cz3aQvWM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,8 +1,9 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { ChevronLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import NotificationBadge from '../../components/NotificationBadge';
 
 export default function ExtendsLayout() {
   const router = useRouter();
@@ -26,6 +27,11 @@ export default function ExtendsLayout() {
             <ChevronLeft size={24} color="#2563EB" />
           </TouchableOpacity>
         ),
+        headerRight: () => (
+          <View style={{ marginRight: 10 }}>
+            <NotificationBadge color="#2563EB" />
+          </View>
+        ),
       }}
     >
       <Stack.Screen 
@@ -44,6 +50,13 @@ export default function ExtendsLayout() {
         name="checklist-details" 
         options={{ 
           title: 'Détails de la Fiche',
+        }} 
+      />
+      <Stack.Screen 
+        name="notifications" 
+        options={{ 
+          title: 'Notifications',
+          headerRight: () => null, // Pas de badge de notification sur l'écran des notifications
         }} 
       />
     </Stack>

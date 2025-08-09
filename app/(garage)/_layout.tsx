@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Inbox, History, User, MessageSquare } from 'lucide-react-native';
+import { Inbox, History, User, MessageSquare, Bell } from 'lucide-react-native';
 
 export default function GarageLayout() {
   return (
@@ -46,6 +46,13 @@ export default function GarageLayout() {
           tabBarIcon: ({ size, color }) => (
             <MessageSquare size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          title: 'Notifications',
+          tabBarIcon: ({ size, color }) => <Bell size={size} color={color} />,
         }}
       />
       <Tabs.Screen

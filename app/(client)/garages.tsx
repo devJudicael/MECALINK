@@ -16,6 +16,7 @@ import type { Garage } from '@/types';
 import { Search, MapPin, Star, Clock, ChevronRight } from 'lucide-react-native';
 import { useGarageStore } from '@/stores/garages';
 import CarouselOffers from '@/components/CarouselOffers';
+import HeaderWithNotification from '@/components/HeaderWithNotification';
 
 export default function GaragesListScreen() {
   const [garages, setGarages] = useState<Garage[]>([]);
@@ -166,8 +167,13 @@ export default function GaragesListScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Liste des garages</Text>
+      <HeaderWithNotification 
+        title="Liste des garages" 
+        backgroundColor="#fff"
+        textColor="#1e293b"
+        iconColor="#2563EB"
+      />
+      <View style={styles.subtitleContainer}>
         <Text style={styles.subtitle}>
           {filteredGarages.length} garage(s) trouvé(s)
         </Text>
@@ -247,18 +253,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8fafc',
   },
-  header: {
-    padding: 20,
-    // paddingTop: 40,
+  subtitleContainer: {
+    padding: 10,
+    paddingHorizontal: 20,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e2e8f0',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,

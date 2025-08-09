@@ -10,6 +10,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { User, Mail, Phone, LogOut, Car } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import HeaderWithNotification from '@/components/HeaderWithNotification';
 
 export default function ProfileScreen() {
   const { currentUser, logout } = useAuth();
@@ -33,11 +34,16 @@ export default function ProfileScreen() {
   }
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      <HeaderWithNotification 
+        title={currentUser.name}
+        backgroundColor="#fff"
+        textColor="#1e293b"
+        iconColor="#2563EB"
+      />
+      <View style={styles.profileHeader}>
         <View style={styles.avatarContainer}>
           <Car size={32} color="#2563EB" />
         </View>
-        <Text style={styles.name}>{currentUser.name}</Text>
         <Text style={styles.role}>Client</Text>
       </View>
       <ScrollView style={styles.content}>
@@ -115,10 +121,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8fafc',
   },
-  header: {
+  profileHeader: {
     alignItems: 'center',
-    paddingTop: 40,
-    paddingBottom: 30,
+    paddingTop: 20,
+    paddingBottom: 20,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e2e8f0',
@@ -132,12 +138,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: 4,
-  },
+
   role: {
     fontSize: 16,
     color: '#64748b',

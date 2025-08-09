@@ -10,6 +10,7 @@ import { router } from 'expo-router';
 import { User } from '../types';
 import { Alert } from 'react-native';
 import { API_URL } from '../config/api';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -46,6 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { expoPushToken } = usePushNotifications();
 
   useEffect(() => {
     loadUserFromStorage();
@@ -92,7 +94,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ 
+          email, 
+          password,
+          deviceToken: expoPushToken 
+        }),
       });
 
       const data = await response.json();
@@ -149,6 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         },
         body: JSON.stringify({
           ...userData,
+          deviceToken: expoPushToken,
           // role: 'client'
         }),
       });
@@ -209,7 +216,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData), // Envoyer les données telles quelles sans les modifier
+        body: JSON.stringify({
+          ...userData,
+          deviceToken: expoPushToken
+        }),
       });
 
       const data = await response.json();

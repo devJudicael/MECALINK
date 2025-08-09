@@ -23,6 +23,7 @@ import {
   RefreshCw,
 } from 'lucide-react-native';
 import CarouselOffers from '@/components/CarouselOffers';
+import HeaderWithNotification from '@/components/HeaderWithNotification';
 
 export default function GarageRequestsScreen() {
   const { currentUser } = useAuth();
@@ -201,8 +202,13 @@ export default function GarageRequestsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Demandes reçues</Text>
+      <HeaderWithNotification 
+        title="Demandes reçues" 
+        backgroundColor="#fff"
+        textColor="#1e293b"
+        iconColor="#059669"
+      />
+      <View style={styles.subtitleContainer}>
         <View style={styles.headerActions}>
           <Text style={styles.subtitle}>
             {pendingRequests.length} demande(s) en attente
@@ -282,18 +288,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8fafc',
   },
-  header: {
-    padding: 20,
-    paddingTop: 40,
+  subtitleContainer: {
+    padding: 10,
+    paddingHorizontal: 20,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e2e8f0',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,

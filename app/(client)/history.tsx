@@ -19,6 +19,7 @@ import {
   CircleAlert as AlertCircle,
 } from 'lucide-react-native';
 import CarouselOffers from '@/components/CarouselOffers';
+import HeaderWithNotification from '@/components/HeaderWithNotification';
 
 export default function HistoryScreen() {
   const { currentUser } = useAuth();
@@ -120,8 +121,13 @@ export default function HistoryScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Historique des demandes</Text>
+      <HeaderWithNotification 
+        title="Historique des demandes" 
+        backgroundColor="#fff"
+        textColor="#1e293b"
+        iconColor="#2563EB"
+      />
+      <View style={styles.subtitleContainer}>
         <Text style={styles.subtitle}>{requests.length} demandes</Text>
       </View>
 
@@ -165,18 +171,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8fafc',
   },
-  header: {
-    padding: 20,
-    paddingTop: 40,
+  subtitleContainer: {
+    padding: 10,
+    paddingHorizontal: 20,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e2e8f0',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,

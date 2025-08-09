@@ -12,6 +12,7 @@ export interface User {
     address: string;
   };
   isActive?: boolean;
+  deviceToken?: string | null;
 }
 
 // Types pour les garages
@@ -47,6 +48,18 @@ export interface ServiceRequest {
     longitude: number;
     address: string;
   };
+
+// Types pour les notifications
+export interface Notification {
+  _id: string;
+  accountId: string;
+  accountType: 'User' | 'Garage';
+  title: string;
+  body: string;
+  data?: any;
+  status: 'read' | 'unread';
+  createdAt: string;
+}
   // vehicleInfo: {
   //   make: string;
   //   model: string;
