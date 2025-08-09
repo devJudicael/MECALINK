@@ -33,3 +33,9 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# google firebase keys
+google-services.json
+mecalink-keys.json
+
+
