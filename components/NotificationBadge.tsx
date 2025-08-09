@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Bell } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { fetchNotifications } from '../services/notificationService';
+import { useIsFocused } from '@react-navigation/native';
 
 interface NotificationBadgeProps {
   size?: number;
@@ -18,27 +19,67 @@ const NotificationBadge: React.FC<NotificationBadgeProps> = ({
   const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
 
+  // Utiliser useIsFocused pour détecter quand l'écran est actif
+  const isFocused = useIsFocused();
+
+  // Utiliser useFocusEffect pour recharger les notifications à chaque fois que l'écran est focalisé
+  useFocusEffect(
+    useCallback(() => {
+      // console.log(
+      //   'NotificationBadge: Screen focused, loading notifications...'
+      // );
+      // Charger immédiatement les notifications
+      loadNotifications();
+
+      // Recharger après un court délai pour s'assurer que les notifications ont été marquées comme lues
+      // Cela est particulièrement utile lorsqu'on revient de l'écran des notifications
+      // const immediateTimer = setTimeout(loadNotifications, 300);
+
+      // // Recharger à nouveau après un délai plus long pour s'assurer que les mises à jour sont prises en compte
+      // const delayedTimer = setTimeout(loadNotifications, 1000);
+
+      // // Mettre à jour les notifications toutes les 10 secondes quand l'écran est actif
+      // const interval = setInterval(loadNotifications, 10000);
+
+      return () => {
+        // clearTimeout(immediateTimer);
+        // clearTimeout(delayedTimer);
+        // clearInterval(interval);
+      };
+    }, [])
+  );
+
+  // Effet supplémentaire pour recharger quand l'écran devient actif
+  // Cela est complémentaire à useFocusEffect et assure une meilleure réactivité
   useEffect(() => {
-    // Charger les notifications au montage du composant
-    loadNotifications();
+    if (isFocused) {
+      // console.log('NotificationBadge: Screen is focused via useIsFocused');
+      loadNotifications();
 
-    // Mettre à jour les notifications toutes les 60 secondes
-    const interval = setInterval(loadNotifications, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
+      // Recharger après un court délai
+      const timer = setTimeout(loadNotifications, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isFocused]);
 
   const loadNotifications = async () => {
     try {
+      // console.log('NotificationBadge: Chargement des notifications...');
       const notifications = await fetchNotifications();
       // Vérifier si notifications est défini avant d'appeler filter
       if (notifications && Array.isArray(notifications)) {
         const unreadNotifications = notifications.filter(
           (notification) => notification.status === 'unread'
         );
+        console.log(
+          `NotificationBadge: ${unreadNotifications.length} notifications non lues trouvées`
+        );
         setUnreadCount(unreadNotifications.length);
       } else {
         // Si notifications n'est pas un tableau, initialiser à 0
+        console.log(
+          'NotificationBadge: Aucune notification trouvée ou format invalide'
+        );
         setUnreadCount(0);
       }
     } catch (error) {

@@ -25,9 +25,10 @@ const NotificationsScreen = () => {
     }
   };
 
-  // Marquer toutes les notifications comme lues au montage du composant
+  // Charger les notifications au montage du composant et les marquer comme lues
   useEffect(() => {
     loadNotifications();
+    // Marquer automatiquement toutes les notifications comme lues
     markAllAsRead();
   }, []);
 
@@ -38,22 +39,36 @@ const NotificationsScreen = () => {
   };
 
   const handleMarkAsRead = async (notificationId: string) => {
-    const success = await markNotificationAsRead(notificationId);
-    if (success) {
-      setNotifications(notifications.map(notification => 
-        notification._id === notificationId 
-          ? { ...notification, status: 'read' as 'read' } 
-          : notification
-      ));
+    try {
+      const success = await markNotificationAsRead(notificationId);
+      if (success) {
+        // Utiliser la fonction de mise à jour d'état avec l'état précédent
+        setNotifications(prevNotifications => 
+          prevNotifications.map(notification => 
+            notification._id === notificationId 
+              ? { ...notification, status: 'read' as 'read' } 
+              : notification
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Erreur lors du marquage de la notification comme lue:', error);
     }
   };
 
   const markAllAsRead = async () => {
-    const success = await markAllNotificationsAsRead();
-    if (success) {
-      setNotifications(notifications.map(notification => 
-        ({ ...notification, status: 'read' as 'read' })
-      ));
+    try {
+      const success = await markAllNotificationsAsRead();
+      if (success) {
+        // Mettre à jour l'état local pour marquer toutes les notifications comme lues
+        setNotifications(prevNotifications => 
+          prevNotifications.map(notification => 
+            ({ ...notification, status: 'read' as 'read' })
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Erreur lors du marquage des notifications comme lues:', error);
     }
   };
 
@@ -98,6 +113,7 @@ const NotificationsScreen = () => {
           <Text style={styles.emptyText}>Aucune notification</Text>
         </View>
       ) : (
+        <>
         <FlatList
           data={notifications}
           renderItem={renderNotificationItem}
@@ -111,6 +127,7 @@ const NotificationsScreen = () => {
             />
           }
         />
+        </>
       )}
     </View>
   );
@@ -166,6 +183,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     alignSelf: 'center',
   },
+
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',

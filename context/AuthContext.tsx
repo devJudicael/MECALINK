@@ -94,10 +94,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          email, 
+        body: JSON.stringify({
+          email,
           password,
-          deviceToken: expoPushToken 
+          deviceToken: expoPushToken,
         }),
       });
 
@@ -218,7 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         },
         body: JSON.stringify({
           ...userData,
-          deviceToken: expoPushToken
+          deviceToken: expoPushToken,
         }),
       });
 
@@ -263,6 +263,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async (): Promise<void> => {
     try {
+      // Récupérer le token d'authentification avant de le supprimer
+      const authToken = await AsyncStorage.getItem('authToken');
+
+      // Désassocier le deviceToken du compte utilisateur
+      if (authToken && currentUser) {
+        try {
+          const response = await fetch(`${API_URL}/auth/logout`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
+
+          if (response.ok) {
+            console.log('Device token successfully disassociated from account');
+          } else {
+            console.error(
+              'Failed to disassociate device token:',
+              response.status
+            );
+          }
+        } catch (apiError) {
+          console.error('API error during logout:', apiError);
+        }
+      }
+
       // Clear user state
       setCurrentUser(null);
 
